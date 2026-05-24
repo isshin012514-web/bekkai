@@ -11,7 +11,7 @@ export const DUMMY_OUTPUTS: Output[] = [
     title: '起業家思考法 書評',
     type: 'article',
     self_score: 7.0,
-    self_note: '本の要点を整理できたが、自分の経験との接続が弱い',
+    memo: '本の要点を整理できたが、自分の経験との接続が弱い',
     created_at: subHours(now, 3).toISOString(),
   },
   {
@@ -20,7 +20,7 @@ export const DUMMY_OUTPUTS: Output[] = [
     title: 'MTG発言 (新企画案)',
     type: 'speech',
     self_score: 5.5,
-    self_note: '準備不足で具体性に欠けた',
+    memo: '準備不足で具体性に欠けた',
     created_at: subDays(now, 1).toISOString(),
     reviewer_id: 'r1',
     peer_score: 7.0,

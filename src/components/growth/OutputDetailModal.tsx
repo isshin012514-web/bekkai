@@ -62,11 +62,11 @@ export function OutputDetailModal({ open, onClose, output }: OutputDetailModalPr
           </div>
         </div>
 
-        {output.self_note && (
+        {output.memo && (
           <div>
-            <p className="text-[12px] font-medium text-text-secondary mb-1">自己メモ</p>
+            <p className="text-[12px] font-medium text-text-secondary mb-1">メモ</p>
             <p className="text-sm text-text-primary bg-surface-secondary rounded-lg p-3">
-              {output.self_note}
+              {output.memo}
             </p>
           </div>
         )}
