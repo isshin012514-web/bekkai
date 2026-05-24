@@ -19,7 +19,42 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
 
   const buildShareText = () => {
     if (!selectedOutput) return ''
-    return `【採点依頼】\n「${selectedOutput.title}」（${OUTPUT_TYPE_LABELS[selectedOutput.type]}）\n自己採点: ${selectedOutput.self_score.toFixed(1)}/10\n\nこのアウトプットを採点してもらえませんか？\n10点満点で点数と一言コメントをお願いします！`
+
+    const detail = selectedOutput.self_score_detail
+    const detailLines = detail
+      ? `\n  独自性: ${detail.originality.toFixed(1)}  実用性: ${detail.practicality.toFixed(1)}  完成度: ${detail.completeness.toFixed(1)}`
+      : ''
+
+    const goodLine = selectedOutput.self_good
+      ? `\n良かった点: ${selectedOutput.self_good}`
+      : ''
+
+    const improveLine = selectedOutput.self_improve
+      ? `\n改善点: ${selectedOutput.self_improve}`
+      : ''
+
+    return [
+      `【採点依頼】`,
+      ``,
+      `■ アウトプット`,
+      `「${selectedOutput.title}」（${OUTPUT_TYPE_LABELS[selectedOutput.type]}）`,
+      ``,
+      `■ 自己採点: ${selectedOutput.self_score.toFixed(1)}/10${detailLines}`,
+      goodLine ? `${goodLine}` : null,
+      improveLine ? `${improveLine}` : null,
+      ``,
+      `■ お願いしたいこと`,
+      `以下の3つの観点で採点をお願いします！`,
+      ``,
+      `1. 独自性（0-10）`,
+      `   → 自分なりの視点や切り口があるか`,
+      `2. 実用性（0-10）`,
+      `   → 誰かの役に立つか・使えるか`,
+      `3. 完成度（0-10）`,
+      `   → 質・量ともに仕上がっているか`,
+      ``,
+      `総合スコア（0-10）と一言コメントもお願いします！`,
+    ].filter((l) => l !== null).join('\n')
   }
 
   const handleShare = async () => {
@@ -33,7 +68,6 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
         // User cancelled share
       }
     } else {
-      // Fallback: copy to clipboard
       await handleCopy()
     }
   }
@@ -96,7 +130,7 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
 
         {/* Share preview */}
         {selectedOutput && (
-          <div className="bg-surface-secondary rounded-lg p-3">
+          <div className="bg-surface-secondary rounded-lg p-3 max-h-52 overflow-y-auto">
             <p className="text-[11px] text-text-tertiary mb-1">送信メッセージプレビュー</p>
             <p className="text-[12px] text-text-secondary whitespace-pre-line leading-relaxed">
               {buildShareText()}
@@ -105,7 +139,6 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
         )}
 
         <div className="flex gap-3">
-          {/* Share button */}
           <button
             type="button"
             onClick={handleShare}
@@ -115,8 +148,6 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
             <Share2 size={16} />
             外部アプリで送る
           </button>
-
-          {/* Copy button */}
           <button
             type="button"
             onClick={handleCopy}

@@ -1,13 +1,19 @@
 import { z } from 'zod'
 
+const scoreField = z.number().min(0).max(10)
+
 export const outputSchema = z.object({
   title: z.string().min(1, 'タイトルは必須です'),
   type: z.enum(['article', 'speech', 'product', 'post', 'other']),
-  self_score: z
-    .number()
-    .min(0, '0以上で入力してください')
-    .max(10, '10以下で入力してください'),
+  self_score: scoreField,
+  self_score_detail: z.object({
+    originality: scoreField,
+    practicality: scoreField,
+    completeness: scoreField,
+  }).optional(),
   self_note: z.string().optional(),
+  self_good: z.string().optional(),
+  self_improve: z.string().optional(),
 })
 
 export type OutputFormValues = z.infer<typeof outputSchema>

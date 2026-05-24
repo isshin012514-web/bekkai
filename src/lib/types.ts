@@ -1,12 +1,21 @@
 export type OutputType = 'article' | 'speech' | 'product' | 'post' | 'other'
 
+export interface SelfScoreDetail {
+  originality: number    // 独自性
+  practicality: number   // 実用性
+  completeness: number   // 完成度
+}
+
 export interface Output {
   id: string
   user_id: string
   title: string
   type: OutputType
   self_score: number
+  self_score_detail?: SelfScoreDetail
   self_note?: string
+  self_good?: string     // 良かった点
+  self_improve?: string  // 改善点
   created_at: string
   reviewer_id?: string
   peer_score?: number

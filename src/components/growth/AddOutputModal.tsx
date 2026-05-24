@@ -12,7 +12,12 @@ interface AddOutputModalProps {
 }
 
 const OUTPUT_TYPES: OutputType[] = ['article', 'speech', 'product', 'post', 'other']
-const SCORE_OPTIONS = Array.from({ length: 21 }, (_, i) => i * 0.5)
+
+const CRITERIA = [
+  { key: 'originality' as const, label: '独自性', hint: '自分なりの視点や切り口があるか' },
+  { key: 'practicality' as const, label: '実用性', hint: '誰かの役に立つか・使えるか' },
+  { key: 'completeness' as const, label: '完成度', hint: '質・量ともに仕上がっているか' },
+]
 
 export function AddOutputModal({ open, onClose }: AddOutputModalProps) {
   const addOutput = useGrowthStore((s) => s.addOutput)
@@ -30,11 +35,23 @@ export function AddOutputModal({ open, onClose }: AddOutputModalProps) {
       title: '',
       type: 'article',
       self_score: 5,
+      self_score_detail: { originality: 5, practicality: 5, completeness: 5 },
       self_note: '',
+      self_good: '',
+      self_improve: '',
     },
   })
 
   const selfScore = watch('self_score')
+  const detail = watch('self_score_detail')
+
+  // Auto-calc overall from detail average
+  const updateOverall = (field: 'originality' | 'practicality' | 'completeness', value: number) => {
+    const newDetail = { ...(detail ?? { originality: 5, practicality: 5, completeness: 5 }), [field]: value }
+    setValue('self_score_detail', newDetail)
+    const avg = Math.round(((newDetail.originality + newDetail.practicality + newDetail.completeness) / 3) * 2) / 2
+    setValue('self_score', avg)
+  }
 
   const onSubmit = (data: OutputFormValues) => {
     addOutput(data)
@@ -48,8 +65,9 @@ export function AddOutputModal({ open, onClose }: AddOutputModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="アウトプット記録">
+    <Modal open={open} onClose={handleClose} title="アウトプット記録 & 自己採点">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Title */}
         <div>
           <label className="block text-[12px] font-medium text-text-secondary mb-1">
             タイトル
@@ -64,6 +82,7 @@ export function AddOutputModal({ open, onClose }: AddOutputModalProps) {
           )}
         </div>
 
+        {/* Type */}
         <div>
           <label className="block text-[12px] font-medium text-text-secondary mb-1">
             種別
@@ -85,45 +104,75 @@ export function AddOutputModal({ open, onClose }: AddOutputModalProps) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-[12px] font-medium text-text-secondary mb-1">
-            自己採点 (0-10)
+        {/* Criteria-based scoring */}
+        <div className="bg-surface-secondary rounded-lg p-3">
+          <label className="block text-[12px] font-medium text-text-secondary mb-2">
+            自己採点（観点別）
           </label>
-          <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={0}
-              max={10}
-              step={0.5}
-              value={selfScore}
-              onChange={(e) => setValue('self_score', parseFloat(e.target.value))}
-              className="flex-1 accent-primary"
-            />
-            <select
-              value={selfScore}
-              onChange={(e) => setValue('self_score', parseFloat(e.target.value))}
-              className="w-16 px-2 py-1.5 border border-border-card rounded-lg text-sm text-center bg-surface"
-            >
-              {SCORE_OPTIONS.map((v) => (
-                <option key={v} value={v}>
-                  {v.toFixed(1)}
-                </option>
-              ))}
-            </select>
+          <div className="space-y-3">
+            {CRITERIA.map((c) => (
+              <div key={c.key}>
+                <div className="flex items-center justify-between mb-0.5">
+                  <span className="text-[12px] font-medium">{c.label}</span>
+                  <span className="text-[12px] text-primary font-medium w-8 text-right">
+                    {(detail?.[c.key] ?? 5).toFixed(1)}
+                  </span>
+                </div>
+                <p className="text-[10px] text-text-tertiary mb-1">{c.hint}</p>
+                <input
+                  type="range"
+                  min={0}
+                  max={10}
+                  step={0.5}
+                  value={detail?.[c.key] ?? 5}
+                  onChange={(e) => updateOverall(c.key, parseFloat(e.target.value))}
+                  className="w-full accent-primary h-1.5"
+                />
+              </div>
+            ))}
           </div>
-          {errors.self_score && (
-            <p className="text-[11px] text-red-500 mt-1">{errors.self_score.message}</p>
-          )}
+          {/* Overall score display */}
+          <div className="mt-3 pt-3 border-t border-border-card flex items-center justify-between">
+            <span className="text-[12px] font-medium text-text-secondary">総合スコア</span>
+            <span className="text-lg font-bold text-primary">{selfScore.toFixed(1)}</span>
+          </div>
         </div>
 
+        {/* Good points */}
+        <div>
+          <label className="block text-[12px] font-medium text-text-secondary mb-1">
+            良かった点
+          </label>
+          <textarea
+            {...register('self_good')}
+            rows={2}
+            placeholder="例：自分なりの仮説を入れられた、データを使って裏付けした"
+            className="w-full px-3 py-2.5 border border-border-card rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none bg-surface"
+          />
+        </div>
+
+        {/* Areas for improvement */}
+        <div>
+          <label className="block text-[12px] font-medium text-text-secondary mb-1">
+            改善点・次回への学び
+          </label>
+          <textarea
+            {...register('self_improve')}
+            rows={2}
+            placeholder="例：結論が弱かった、もっとユーザー視点を入れたい"
+            className="w-full px-3 py-2.5 border border-border-card rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none bg-surface"
+          />
+        </div>
+
+        {/* Free memo */}
         <div>
           <label className="block text-[12px] font-medium text-text-secondary mb-1">
             メモ (任意)
           </label>
           <textarea
             {...register('self_note')}
-            rows={3}
-            placeholder="振り返りや気づきを記録..."
+            rows={2}
+            placeholder="その他の振り返りや気づき..."
             className="w-full px-3 py-2.5 border border-border-card rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none bg-surface"
           />
         </div>
