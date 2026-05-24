@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
-import { Plus } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import type { RoleModel } from '@/lib/types'
 import { ROLE_MODEL_COLORS } from '@/lib/types'
 import { Modal } from '@/components/ui/Modal'
@@ -15,7 +15,9 @@ interface RoleModelDetailModalProps {
 
 export function RoleModelDetailModal({ open, onClose, roleModel }: RoleModelDetailModalProps) {
   const addLearningNote = useGrowthStore((s) => s.addLearningNote)
+  const deleteRoleModel = useGrowthStore((s) => s.deleteRoleModel)
   const [noteText, setNoteText] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (!roleModel) return null
 
@@ -85,6 +87,24 @@ export function RoleModelDetailModal({ open, onClose, roleModel }: RoleModelDeta
             </div>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirmDelete) { setConfirmDelete(true); return }
+            deleteRoleModel(roleModel.id)
+            setConfirmDelete(false)
+            onClose()
+          }}
+          className={`w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            confirmDelete
+              ? 'bg-red-500 text-white'
+              : 'border border-border-card text-text-secondary hover:text-red-500 hover:border-red-300'
+          }`}
+        >
+          <Trash2 size={14} />
+          {confirmDelete ? '本当に削除する' : '削除'}
+        </button>
       </div>
     </Modal>
   )

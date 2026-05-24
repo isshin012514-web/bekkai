@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Output, RoleModel, UpcomingPerson } from '@/lib/types'
 import { GrowthHome } from '@/components/growth/GrowthHome'
 import { AddOutputModal } from '@/components/growth/AddOutputModal'
@@ -12,33 +12,8 @@ import { WeeklyReviewModal } from '@/components/growth/WeeklyReviewModal'
 import { AddInputModal } from '@/components/growth/AddInputModal'
 import { AddUpcomingPersonModal } from '@/components/growth/AddUpcomingPersonModal'
 import { useGrowthStore } from '@/stores/growth-store'
-import {
-  DUMMY_OUTPUTS,
-  DUMMY_REVIEWERS,
-  DUMMY_ROLE_MODELS,
-  DUMMY_UPCOMING_PEOPLE,
-  DUMMY_INPUTS,
-} from '@/lib/dummy-data'
-
-function useSeedDummyData() {
-  const outputs = useGrowthStore((s) => s.outputs)
-  const seedData = useGrowthStore((s) => s.seedData)
-
-  useEffect(() => {
-    if (outputs.length > 0) return
-    seedData({
-      outputs: DUMMY_OUTPUTS,
-      reviewers: DUMMY_REVIEWERS,
-      roleModels: DUMMY_ROLE_MODELS,
-      upcomingPeople: DUMMY_UPCOMING_PEOPLE,
-      inputs: DUMMY_INPUTS,
-    })
-  }, [outputs.length, seedData])
-}
 
 function App() {
-  useSeedDummyData()
-
   const outputs = useGrowthStore((s) => s.outputs)
   const upcomingPeople = useGrowthStore((s) => s.upcomingPeople)
 

@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
+import { Trash2 } from 'lucide-react'
 import type { Output } from '@/lib/types'
 import { OUTPUT_TYPE_LABELS } from '@/lib/types'
 import { Modal } from '@/components/ui/Modal'
+import { useGrowthStore } from '@/stores/growth-store'
 
 interface OutputDetailModalProps {
   open: boolean
@@ -11,10 +14,28 @@ interface OutputDetailModalProps {
 }
 
 export function OutputDetailModal({ open, onClose, output }: OutputDetailModalProps) {
+  const deleteOutput = useGrowthStore((s) => s.deleteOutput)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
   if (!output) return null
 
+  const handleDelete = () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    deleteOutput(output.id)
+    setConfirmDelete(false)
+    onClose()
+  }
+
+  const handleClose = () => {
+    setConfirmDelete(false)
+    onClose()
+  }
+
   return (
-    <Modal open={open} onClose={onClose} title="アウトプット詳細">
+    <Modal open={open} onClose={handleClose} title="アウトプット詳細">
       <div className="space-y-4">
         <div>
           <h3 className="text-base font-medium">{output.title}</h3>
@@ -72,6 +93,19 @@ export function OutputDetailModal({ open, onClose, output }: OutputDetailModalPr
             </div>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          className={`w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            confirmDelete
+              ? 'bg-red-500 text-white'
+              : 'border border-border-card text-text-secondary hover:text-red-500 hover:border-red-300'
+          }`}
+        >
+          <Trash2 size={14} />
+          {confirmDelete ? '本当に削除する' : '削除'}
+        </button>
       </div>
     </Modal>
   )

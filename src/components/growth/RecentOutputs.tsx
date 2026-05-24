@@ -45,6 +45,12 @@ export function RecentOutputs({ outputs, onViewAll, onSelect }: RecentOutputsPro
         </button>
       </div>
       <div className="space-y-2">
+        {recent.length === 0 && (
+          <p className="text-sm text-text-tertiary text-center py-6">
+            まだアウトプットがありません。<br />
+            上の「+ アウトプット」から記録しましょう！
+          </p>
+        )}
         {recent.map((output) => (
           <button
             key={output.id}

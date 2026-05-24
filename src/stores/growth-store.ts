@@ -39,6 +39,8 @@ interface GrowthState {
     upcomingPeople: UpcomingPerson[]
     inputs: Input[]
   }) => void
+
+  resetAll: () => void
 }
 
 const USER_ID = 'local-user'
@@ -163,6 +165,15 @@ export const useGrowthStore = create<GrowthState>()(
         })),
 
       seedData: (data) => set(() => ({ ...data })),
+
+      resetAll: () =>
+        set(() => ({
+          outputs: [],
+          reviewers: [],
+          roleModels: [],
+          upcomingPeople: [],
+          inputs: [],
+        })),
     }),
     {
       name: 'bekkai-growth-store',

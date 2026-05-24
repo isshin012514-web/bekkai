@@ -13,10 +13,12 @@ interface QuestionsModalProps {
 
 export function QuestionsModal({ open, onClose, person }: QuestionsModalProps) {
   const updateUpcomingPerson = useGrowthStore((s) => s.updateUpcomingPerson)
+  const deleteUpcomingPerson = useGrowthStore((s) => s.deleteUpcomingPerson)
   const markAsMet = useGrowthStore((s) => s.markAsMet)
   const [newQuestion, setNewQuestion] = useState('')
   const [learnings, setLearnings] = useState('')
   const [showMetForm, setShowMetForm] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (!person) return null
 
@@ -149,6 +151,24 @@ export function QuestionsModal({ open, onClose, person }: QuestionsModalProps) {
             <p className="text-sm">{person.learnings_after}</p>
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={() => {
+            if (!confirmDelete) { setConfirmDelete(true); return }
+            deleteUpcomingPerson(person.id)
+            setConfirmDelete(false)
+            onClose()
+          }}
+          className={`w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            confirmDelete
+              ? 'bg-red-500 text-white'
+              : 'border border-border-card text-text-secondary hover:text-red-500 hover:border-red-300'
+          }`}
+        >
+          <Trash2 size={14} />
+          {confirmDelete ? '本当に削除する' : 'この人を削除'}
+        </button>
       </div>
     </Modal>
   )

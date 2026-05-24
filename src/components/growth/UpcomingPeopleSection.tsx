@@ -28,6 +28,11 @@ export function UpcomingPeopleSection({
           + 追加
         </button>
       </div>
+      {!current && (
+        <p className="text-sm text-text-tertiary text-center py-4">
+          会いたい人を追加して質問を準備しましょう
+        </p>
+      )}
       {current && (
         <button
           onClick={() => onSelect(current)}
