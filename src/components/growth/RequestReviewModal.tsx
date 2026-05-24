@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Share2, Copy, Check } from 'lucide-react'
-import { OUTPUT_TYPE_LABELS } from '@/lib/types'
+import { OUTPUT_TYPE_LABELS, SELF_SCORE_CRITERIA } from '@/lib/types'
 import { Modal } from '@/components/ui/Modal'
 import { useGrowthStore } from '@/stores/growth-store'
 
@@ -22,36 +22,33 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
 
     const detail = selectedOutput.self_score_detail
     const detailLines = detail
-      ? `\n  独自性: ${detail.originality.toFixed(1)}  実用性: ${detail.practicality.toFixed(1)}  完成度: ${detail.completeness.toFixed(1)}`
+      ? SELF_SCORE_CRITERIA.map((c) => `  ${c.label}: ${detail[c.key].toFixed(1)}`).join('\n')
       : ''
 
-    const goodLine = selectedOutput.self_good
-      ? `\n良かった点: ${selectedOutput.self_good}`
+    const audienceLine = selectedOutput.audience
+      ? `対象: ${selectedOutput.audience}`
       : ''
 
-    const improveLine = selectedOutput.self_improve
-      ? `\n改善点: ${selectedOutput.self_improve}`
-      : ''
+    const selfLines = [
+      selectedOutput.self_good ? `できたこと: ${selectedOutput.self_good}` : null,
+      selectedOutput.self_improve ? `できなかったこと: ${selectedOutput.self_improve}` : null,
+    ].filter(Boolean)
 
     return [
       `【採点依頼】`,
       ``,
       `■ アウトプット`,
       `「${selectedOutput.title}」（${OUTPUT_TYPE_LABELS[selectedOutput.type]}）`,
+      audienceLine || null,
       ``,
-      `■ 自己採点: ${selectedOutput.self_score.toFixed(1)}/10${detailLines}`,
-      goodLine ? `${goodLine}` : null,
-      improveLine ? `${improveLine}` : null,
+      selectedOutput.self_score > 0 ? `■ 自己採点: ${selectedOutput.self_score.toFixed(1)}/10` : null,
+      detailLines || null,
+      ...selfLines,
       ``,
       `■ お願いしたいこと`,
-      `以下の3つの観点で採点をお願いします！`,
+      `以下の5つの観点で採点をお願いします！`,
       ``,
-      `1. 独自性（0-10）`,
-      `   → 自分なりの視点や切り口があるか`,
-      `2. 実用性（0-10）`,
-      `   → 誰かの役に立つか・使えるか`,
-      `3. 完成度（0-10）`,
-      `   → 質・量ともに仕上がっているか`,
+      ...SELF_SCORE_CRITERIA.map((c, i) => `${i + 1}. ${c.label}（0-10）\n   → ${c.hint}`),
       ``,
       `総合スコア（0-10）と一言コメントもお願いします！`,
     ].filter((l) => l !== null).join('\n')
@@ -118,9 +115,11 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
                     <span className="text-[11px] text-text-tertiary">
                       {OUTPUT_TYPE_LABELS[output.type]}
                     </span>
-                    <span className="text-[11px] text-text-tertiary">
-                      自己 {output.self_score.toFixed(1)}
-                    </span>
+                    {output.self_score > 0 && (
+                      <span className="text-[11px] text-text-tertiary">
+                        自己 {output.self_score.toFixed(1)}
+                      </span>
+                    )}
                   </div>
                 </button>
               ))}

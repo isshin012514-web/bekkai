@@ -11,6 +11,7 @@ import { RequestReviewModal } from '@/components/growth/RequestReviewModal'
 import { WeeklyReviewModal } from '@/components/growth/WeeklyReviewModal'
 import { AddInputModal } from '@/components/growth/AddInputModal'
 import { AddUpcomingPersonModal } from '@/components/growth/AddUpcomingPersonModal'
+import { SelfScoreModal } from '@/components/growth/SelfScoreModal'
 import { useGrowthStore } from '@/stores/growth-store'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
   const [weeklyReviewOpen, setWeeklyReviewOpen] = useState(false)
   const [addInputOpen, setAddInputOpen] = useState(false)
   const [addPersonOpen, setAddPersonOpen] = useState(false)
+  const [selfScoreOpen, setSelfScoreOpen] = useState(false)
 
   const freshSelectedPerson = selectedPerson
     ? upcomingPeople.find((p) => p.id === selectedPerson.id) ?? null
@@ -37,10 +39,7 @@ function App() {
       <GrowthHome
         onAddOutput={() => setAddOutputOpen(true)}
         onRequestReview={() => setRequestReviewOpen(true)}
-        onSelfScore={() => {
-          const latest = outputs.find((o) => o.peer_score == null) ?? outputs[0]
-          if (latest) setSelectedOutput(latest)
-        }}
+        onSelfScore={() => setSelfScoreOpen(true)}
         onSelectOutput={(o) => setSelectedOutput(o)}
         onSelectRoleModel={(rm) => setSelectedRoleModel(rm)}
         onAddRoleModel={() => setAddRoleModelOpen(true)}
@@ -77,6 +76,7 @@ function App() {
       <WeeklyReviewModal open={weeklyReviewOpen} onClose={() => setWeeklyReviewOpen(false)} />
       <AddInputModal open={addInputOpen} onClose={() => setAddInputOpen(false)} />
       <AddUpcomingPersonModal open={addPersonOpen} onClose={() => setAddPersonOpen(false)} />
+      <SelfScoreModal open={selfScoreOpen} onClose={() => setSelfScoreOpen(false)} />
     </>
   )
 }

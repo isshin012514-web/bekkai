@@ -1,9 +1,11 @@
 export type OutputType = 'article' | 'speech' | 'product' | 'post' | 'other'
 
 export interface SelfScoreDetail {
-  originality: number    // 独自性
-  practicality: number   // 実用性
-  completeness: number   // 完成度
+  originality: number      // 独自性
+  communication: number    // 伝達力
+  practicality: number     // 実用性
+  audience_response: number // 聴衆の反応
+  completeness: number     // 完成度
 }
 
 export interface Output {
@@ -11,11 +13,16 @@ export interface Output {
   user_id: string
   title: string
   type: OutputType
+  audience?: string        // 誰に向けて
+  audience_reaction?: string // 聴衆の反応（記述）
+  has_visuals?: boolean    // 図式・資料を使ったか
+  linked_input_ids?: string[] // 関連インプット
+  memo?: string            // メモ
   self_score: number
   self_score_detail?: SelfScoreDetail
-  self_note?: string
-  self_good?: string     // 良かった点
-  self_improve?: string  // 改善点
+  self_good?: string       // できたこと
+  self_improve?: string    // できなかったこと
+  scored_at?: string       // 自己採点した日時
   created_at: string
   reviewer_id?: string
   peer_score?: number
@@ -99,3 +106,11 @@ export const ROLE_MODEL_COLORS: Record<RoleModelColor, { bg: string; text: strin
   amber: { bg: '#D97706', text: '#FFFFFF' },
   blue: { bg: '#185FA5', text: '#FFFFFF' },
 }
+
+export const SELF_SCORE_CRITERIA = [
+  { key: 'originality' as const, label: '独自性', hint: '自分なりの視点・切り口があったか' },
+  { key: 'communication' as const, label: '伝達力', hint: 'わかりやすく伝えられたか' },
+  { key: 'practicality' as const, label: '実用性', hint: '相手にとって価値ある内容だったか' },
+  { key: 'audience_response' as const, label: '聴衆の反応', hint: '相手の反応・手応えはどうだったか' },
+  { key: 'completeness' as const, label: '完成度', hint: '準備・仕上がりは十分だったか' },
+] as const

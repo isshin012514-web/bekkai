@@ -2,21 +2,33 @@ import { z } from 'zod'
 
 const scoreField = z.number().min(0).max(10)
 
+/* アウトプット記録（採点は別） */
 export const outputSchema = z.object({
   title: z.string().min(1, 'タイトルは必須です'),
   type: z.enum(['article', 'speech', 'product', 'post', 'other']),
-  self_score: scoreField,
+  audience: z.string().optional(),
+  audience_reaction: z.string().optional(),
+  has_visuals: z.boolean().optional(),
+  linked_input_ids: z.array(z.string()).optional(),
+  memo: z.string().optional(),
+})
+
+export type OutputFormValues = z.infer<typeof outputSchema>
+
+/* 自己採点 */
+export const selfScoreSchema = z.object({
   self_score_detail: z.object({
     originality: scoreField,
+    communication: scoreField,
     practicality: scoreField,
+    audience_response: scoreField,
     completeness: scoreField,
-  }).optional(),
-  self_note: z.string().optional(),
+  }),
   self_good: z.string().optional(),
   self_improve: z.string().optional(),
 })
 
-export type OutputFormValues = z.infer<typeof outputSchema>
+export type SelfScoreFormValues = z.infer<typeof selfScoreSchema>
 
 export const roleModelSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
