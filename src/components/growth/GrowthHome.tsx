@@ -19,6 +19,7 @@ import { useGrowthStore } from '@/stores/growth-store'
 interface GrowthHomeProps {
   onAddOutput: () => void
   onRequestReview: () => void
+  onSelfScore: () => void
   onSelectOutput: (output: Output) => void
   onSelectRoleModel: (rm: RoleModel) => void
   onAddRoleModel: () => void
@@ -31,6 +32,7 @@ interface GrowthHomeProps {
 export function GrowthHome({
   onAddOutput,
   onRequestReview,
+  onSelfScore,
   onSelectOutput,
   onSelectRoleModel,
   onAddRoleModel,
@@ -60,7 +62,7 @@ export function GrowthHome({
         avgSelfScore={avgScore}
         peerScoredCount={peerCount}
       />
-      <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} />
+      <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} onSelfScore={onSelfScore} />
       <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} />
       <RoleModelsSection
         roleModels={roleModels}

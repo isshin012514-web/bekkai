@@ -37,6 +37,10 @@ function App() {
       <GrowthHome
         onAddOutput={() => setAddOutputOpen(true)}
         onRequestReview={() => setRequestReviewOpen(true)}
+        onSelfScore={() => {
+          const latest = outputs.find((o) => o.peer_score == null) ?? outputs[0]
+          if (latest) setSelectedOutput(latest)
+        }}
         onSelectOutput={(o) => setSelectedOutput(o)}
         onSelectRoleModel={(rm) => setSelectedRoleModel(rm)}
         onAddRoleModel={() => setAddRoleModelOpen(true)}

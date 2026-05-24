@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Send } from 'lucide-react'
+import { Share2, Copy, Check } from 'lucide-react'
 import { OUTPUT_TYPE_LABELS } from '@/lib/types'
 import { Modal } from '@/components/ui/Modal'
 import { useGrowthStore } from '@/stores/growth-store'
@@ -10,26 +10,57 @@ interface RequestReviewModalProps {
 }
 
 export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
-  const { outputs, reviewers, updateOutput } = useGrowthStore()
+  const { outputs } = useGrowthStore()
   const [selectedOutputId, setSelectedOutputId] = useState<string>('')
-  const [selectedReviewerId, setSelectedReviewerId] = useState<string>('')
+  const [copied, setCopied] = useState(false)
 
   const unreviewedOutputs = outputs.filter((o) => o.peer_score == null)
+  const selectedOutput = outputs.find((o) => o.id === selectedOutputId)
 
-  const handleSend = () => {
-    if (!selectedOutputId || !selectedReviewerId) return
-    updateOutput(selectedOutputId, { reviewer_id: selectedReviewerId })
+  const buildShareText = () => {
+    if (!selectedOutput) return ''
+    return `【採点依頼】\n「${selectedOutput.title}」（${OUTPUT_TYPE_LABELS[selectedOutput.type]}）\n自己採点: ${selectedOutput.self_score.toFixed(1)}/10\n\nこのアウトプットを採点してもらえませんか？\n10点満点で点数と一言コメントをお願いします！`
+  }
+
+  const handleShare = async () => {
+    if (!selectedOutputId) return
+    const text = buildShareText()
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: '採点依頼', text })
+      } catch {
+        // User cancelled share
+      }
+    } else {
+      // Fallback: copy to clipboard
+      await handleCopy()
+    }
+  }
+
+  const handleCopy = async () => {
+    const text = buildShareText()
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard not available
+    }
+  }
+
+  const handleClose = () => {
     setSelectedOutputId('')
-    setSelectedReviewerId('')
+    setCopied(false)
     onClose()
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="採点依頼">
+    <Modal open={open} onClose={handleClose} title="採点依頼">
       <div className="space-y-5">
         <div>
           <label className="block text-[12px] font-medium text-text-secondary mb-2">
-            アウトプットを選択
+            採点してもらうアウトプットを選択
           </label>
           {unreviewedOutputs.length === 0 ? (
             <p className="text-sm text-text-tertiary text-center py-4">
@@ -63,43 +94,39 @@ export function RequestReviewModal({ open, onClose }: RequestReviewModalProps) {
           )}
         </div>
 
-        <div>
-          <label className="block text-[12px] font-medium text-text-secondary mb-2">
-            採点者を選択
-          </label>
-          {reviewers.length === 0 ? (
-            <p className="text-sm text-text-tertiary text-center py-4">
-              採点者が登録されていません
+        {/* Share preview */}
+        {selectedOutput && (
+          <div className="bg-surface-secondary rounded-lg p-3">
+            <p className="text-[11px] text-text-tertiary mb-1">送信メッセージプレビュー</p>
+            <p className="text-[12px] text-text-secondary whitespace-pre-line leading-relaxed">
+              {buildShareText()}
             </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {reviewers.map((reviewer) => (
-                <button
-                  key={reviewer.id}
-                  type="button"
-                  onClick={() => setSelectedReviewerId(reviewer.id)}
-                  className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                    selectedReviewerId === reviewer.id
-                      ? 'border-primary bg-primary-bg text-primary'
-                      : 'border-border-card hover:bg-surface-secondary'
-                  }`}
-                >
-                  {reviewer.name}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        <button
-          type="button"
-          onClick={handleSend}
-          disabled={!selectedOutputId || !selectedReviewerId}
-          className="w-full inline-flex items-center justify-center gap-1.5 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Send size={16} />
-          採点依頼を送る
-        </button>
+        <div className="flex gap-3">
+          {/* Share button */}
+          <button
+            type="button"
+            onClick={handleShare}
+            disabled={!selectedOutputId}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Share2 size={16} />
+            外部アプリで送る
+          </button>
+
+          {/* Copy button */}
+          <button
+            type="button"
+            onClick={handleCopy}
+            disabled={!selectedOutputId}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-3 border border-primary text-primary rounded-lg text-sm font-medium hover:bg-primary-bg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {copied ? <Check size={16} /> : <Copy size={16} />}
+            {copied ? 'コピー済' : 'コピー'}
+          </button>
+        </div>
       </div>
     </Modal>
   )
