@@ -2,7 +2,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { BookOpen, FileText, Video, Users, Mic, Package, MessageSquare, Star } from 'lucide-react'
 import type { Output, Input } from '@/lib/types'
-import { OUTPUT_TYPE_LABELS, INPUT_TYPE_LABELS } from '@/lib/types'
+import { INPUT_TYPE_LABELS } from '@/lib/types'
 
 const INPUT_ICONS: Record<string, typeof BookOpen> = {
   book: BookOpen, article: FileText, video: Video, dialogue: Users, other: FileText,
