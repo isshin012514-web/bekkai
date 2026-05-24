@@ -43,8 +43,19 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
 
   const inputCount = inputs.length
   const outputCount = outputs.length
-  const selfCount = outputs.length
-  const feedbackCount = outputs.filter((o) => o.peer_score != null).length
+  const scoredOutputs = outputs.filter((o) => o.self_score > 0)
+  const selfCount = scoredOutputs.length
+  const reviewedOutputs = outputs.filter((o) => o.peer_score != null)
+  const feedbackCount = reviewedOutputs.length
+
+  /* ── 自己 vs 他者 比較 ── */
+  const avgSelf = reviewedOutputs.length > 0
+    ? reviewedOutputs.reduce((s, o) => s + o.self_score, 0) / reviewedOutputs.length
+    : null
+  const avgPeer = reviewedOutputs.length > 0
+    ? reviewedOutputs.reduce((s, o) => s + (o.peer_score ?? 0), 0) / reviewedOutputs.length
+    : null
+  const gap = avgSelf != null && avgPeer != null ? avgSelf - avgPeer : null
 
   /* ── IO items ── */
   type IOItem = { kind: 'input'; data: Input; at: string } | { kind: 'output'; data: Output; at: string }
@@ -173,6 +184,48 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
           ))}
         </div>
 
+        {/* 自己 vs 他者 比較カード */}
+        {avgSelf != null && avgPeer != null && gap != null && (
+          <div className="bg-surface-secondary rounded-lg p-3 mb-3">
+            <p className="text-[11px] text-text-tertiary mb-2">他者との比較（採点済み{reviewedOutputs.length}件）</p>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="flex-1 text-center">
+                <p className="text-[10px] text-text-tertiary">自己採点</p>
+                <p className="text-lg font-bold text-waiting">{avgSelf.toFixed(1)}</p>
+              </div>
+              <div className="text-text-tertiary text-sm">vs</div>
+              <div className="flex-1 text-center">
+                <p className="text-[10px] text-text-tertiary">他者採点</p>
+                <p className="text-lg font-bold text-done">{avgPeer.toFixed(1)}</p>
+              </div>
+            </div>
+            {/* Comparison bars */}
+            <div className="space-y-1 mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-text-tertiary w-6">自己</span>
+                <div className="flex-1 h-2 bg-surface rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-waiting" style={{ width: `${(avgSelf / 10) * 100}%` }} />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-text-tertiary w-6">他者</span>
+                <div className="flex-1 h-2 bg-surface rounded-full overflow-hidden">
+                  <div className="h-full rounded-full bg-done" style={{ width: `${(avgPeer / 10) * 100}%` }} />
+                </div>
+              </div>
+            </div>
+            <p className="text-[11px] text-center font-medium">
+              {Math.abs(gap) < 0.3 ? (
+                <span className="text-done">自己評価と他者評価がほぼ一致しています</span>
+              ) : gap > 0 ? (
+                <span className="text-waiting">自己評価が他者より{gap.toFixed(1)}点高め（甘め）</span>
+              ) : (
+                <span className="text-primary">自己評価が他者より{Math.abs(gap).toFixed(1)}点低め（辛め）</span>
+              )}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-0.5">
           {filteredScore.length === 0 && (
             <p className="text-sm text-text-tertiary text-center py-4">まだ採点がありません</p>
@@ -221,13 +274,22 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">{output.title}</p>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 mb-1">
                     <span className="text-[11px] text-text-secondary">
                       自己 {output.self_score.toFixed(1)} → 他者 {output.peer_score?.toFixed(1)}
                     </span>
                     <span className={`text-[11px] font-medium ${(output.peer_score ?? 0) >= output.self_score ? 'text-done' : 'text-waiting'}`}>
                       ({(output.peer_score ?? 0) > output.self_score ? '+' : ''}{((output.peer_score ?? 0) - output.self_score).toFixed(1)})
                     </span>
+                  </div>
+                  {/* Mini comparison bars */}
+                  <div className="flex items-center gap-1">
+                    <div className="flex-1 h-1.5 bg-surface rounded-full overflow-hidden flex">
+                      <div className="h-full bg-waiting rounded-full" style={{ width: `${(output.self_score / 10) * 100}%` }} />
+                    </div>
+                    <div className="flex-1 h-1.5 bg-surface rounded-full overflow-hidden flex">
+                      <div className="h-full bg-done rounded-full" style={{ width: `${((output.peer_score ?? 0) / 10) * 100}%` }} />
+                    </div>
                   </div>
                 </div>
                 <span className="text-[11px] text-text-tertiary shrink-0">
