@@ -108,7 +108,7 @@ export const ROLE_MODEL_COLORS: Record<RoleModelColor, { bg: string; text: strin
 }
 
 export const SELF_SCORE_CRITERIA = [
-  { key: 'originality' as const, label: '独自性', hint: '自分なりの視点・切り口があったか' },
+  { key: 'originality' as const, label: '独自性', hint: '自分なりの視点があるか・日本/業界で何位レベルか・希少性はあるか' },
   { key: 'communication' as const, label: '伝達力', hint: 'わかりやすく伝えられたか' },
   { key: 'practicality' as const, label: '実用性', hint: '相手にとって価値ある内容だったか' },
   { key: 'audience_response' as const, label: '聴衆の反応', hint: '相手の反応・手応えはどうだったか' },
