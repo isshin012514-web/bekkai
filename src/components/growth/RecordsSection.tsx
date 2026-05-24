@@ -95,7 +95,7 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
       {/* Feedback / Review Section */}
       <section className="mx-4 mt-4 border border-border-card rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium">採点フィードバック</h2>
+          <h2 className="text-sm font-medium">自己採点/フィードバック</h2>
           <span className="text-[11px] text-text-tertiary">{reviewedOutputs.length}件</span>
         </div>
         <div className="space-y-0.5">
