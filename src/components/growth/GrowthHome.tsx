@@ -63,7 +63,7 @@ export function GrowthHome({
         avgSelfScore={avgScore}
         peerScoredCount={peerCount}
       />
-      <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} />
+      <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} />
       <RecentOutputs
         outputs={outputs}
         onViewAll={onViewAllOutputs}
