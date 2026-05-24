@@ -9,10 +9,9 @@ import {
 import { GrowthHeader } from './GrowthHeader'
 import { WeeklySummary } from './WeeklySummary'
 import { TodayActions } from './TodayActions'
-import { RecentOutputs } from './RecentOutputs'
 import { RoleModelsSection } from './RoleModelsSection'
 import { UpcomingPeopleSection } from './UpcomingPeopleSection'
-import { InputRecordSection } from './InputRecordSection'
+import { RecordsSection } from './RecordsSection'
 import { GrowthCycleSection } from './GrowthCycleSection'
 import { WeeklyReviewButton } from './WeeklyReviewButton'
 import { useGrowthStore } from '@/stores/growth-store'
@@ -20,7 +19,6 @@ import { useGrowthStore } from '@/stores/growth-store'
 interface GrowthHomeProps {
   onAddOutput: () => void
   onRequestReview: () => void
-  onViewAllOutputs: () => void
   onSelectOutput: (output: Output) => void
   onSelectRoleModel: (rm: RoleModel) => void
   onAddRoleModel: () => void
@@ -33,7 +31,6 @@ interface GrowthHomeProps {
 export function GrowthHome({
   onAddOutput,
   onRequestReview,
-  onViewAllOutputs,
   onSelectOutput,
   onSelectRoleModel,
   onAddRoleModel,
@@ -64,11 +61,7 @@ export function GrowthHome({
         peerScoredCount={peerCount}
       />
       <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} />
-      <RecentOutputs
-        outputs={outputs}
-        onViewAll={onViewAllOutputs}
-        onSelect={onSelectOutput}
-      />
+      <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} />
       <RoleModelsSection
         roleModels={roleModels}
         onSelect={onSelectRoleModel}
@@ -81,7 +74,6 @@ export function GrowthHome({
         onSelect={onSelectPerson}
         onAdd={onAddPerson}
       />
-      <InputRecordSection inputs={inputs} outputs={outputs} onAddInput={onAddInput} />
       <GrowthCycleSection />
       <WeeklyReviewButton onPress={onWeeklyReview} />
     </div>

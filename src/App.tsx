@@ -37,7 +37,6 @@ function App() {
       <GrowthHome
         onAddOutput={() => setAddOutputOpen(true)}
         onRequestReview={() => setRequestReviewOpen(true)}
-        onViewAllOutputs={() => setAllOutputsOpen(true)}
         onSelectOutput={(o) => setSelectedOutput(o)}
         onSelectRoleModel={(rm) => setSelectedRoleModel(rm)}
         onAddRoleModel={() => setAddRoleModelOpen(true)}
