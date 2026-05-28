@@ -13,6 +13,7 @@ import { RoleModelsSection } from './RoleModelsSection'
 import { UpcomingPeopleSection } from './UpcomingPeopleSection'
 import { RecordsSection } from './RecordsSection'
 import { GrowthCycleSection } from './GrowthCycleSection'
+import { DataManagementSection } from './DataManagementSection'
 import { WeeklyReviewButton } from './WeeklyReviewButton'
 import { useGrowthStore } from '@/stores/growth-store'
 
@@ -77,6 +78,7 @@ export function GrowthHome({
         onAdd={onAddPerson}
       />
       <GrowthCycleSection />
+      <DataManagementSection />
       <WeeklyReviewButton onPress={onWeeklyReview} />
     </div>
   )

@@ -75,6 +75,14 @@ export interface Input {
   created_at: string
 }
 
+export interface WeeklyGoal {
+  id: string
+  week: string
+  goal: string
+  done: boolean
+  created_at: string
+}
+
 export const OUTPUT_TYPE_LABELS: Record<OutputType, string> = {
   article: '記事',
   speech: '発言',

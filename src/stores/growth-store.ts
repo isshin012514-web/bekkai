@@ -1,15 +1,18 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Output, Reviewer, RoleModel, UpcomingPerson, Input } from '@/lib/types'
+import type { Output, Reviewer, RoleModel, UpcomingPerson, Input, WeeklyGoal } from '@/lib/types'
 import { generateId, nowISO } from '@/lib/utils'
 
-interface GrowthState {
+interface GrowthData {
   outputs: Output[]
   reviewers: Reviewer[]
   roleModels: RoleModel[]
   upcomingPeople: UpcomingPerson[]
   inputs: Input[]
+  weeklyGoals: WeeklyGoal[]
+}
 
+interface GrowthState extends GrowthData {
   addOutput: (data: Omit<Output, 'id' | 'user_id' | 'created_at'>) => void
   updateOutput: (id: string, data: Partial<Output>) => void
   deleteOutput: (id: string) => void
@@ -32,6 +35,11 @@ interface GrowthState {
   updateInput: (id: string, data: Partial<Input>) => void
   deleteInput: (id: string) => void
 
+  addWeeklyGoal: (data: Omit<WeeklyGoal, 'id' | 'created_at'>) => void
+  updateWeeklyGoal: (id: string, data: Partial<WeeklyGoal>) => void
+  toggleWeeklyGoal: (id: string) => void
+  deleteWeeklyGoal: (id: string) => void
+
   seedData: (data: {
     outputs: Output[]
     reviewers: Reviewer[]
@@ -40,6 +48,9 @@ interface GrowthState {
     inputs: Input[]
   }) => void
 
+  exportData: () => GrowthData
+  importData: (data: GrowthData) => void
+
   resetAll: () => void
 }
 
@@ -47,12 +58,13 @@ const USER_ID = 'local-user'
 
 export const useGrowthStore = create<GrowthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       outputs: [],
       reviewers: [],
       roleModels: [],
       upcomingPeople: [],
       inputs: [],
+      weeklyGoals: [],
 
       addOutput: (data) =>
         set((state) => ({
@@ -164,7 +176,54 @@ export const useGrowthStore = create<GrowthState>()(
           inputs: state.inputs.filter((i) => i.id !== id),
         })),
 
+      addWeeklyGoal: (data) =>
+        set((state) => ({
+          weeklyGoals: [
+            { ...data, id: generateId(), created_at: nowISO() },
+            ...state.weeklyGoals,
+          ],
+        })),
+
+      updateWeeklyGoal: (id, data) =>
+        set((state) => ({
+          weeklyGoals: state.weeklyGoals.map((g) => (g.id === id ? { ...g, ...data } : g)),
+        })),
+
+      toggleWeeklyGoal: (id) =>
+        set((state) => ({
+          weeklyGoals: state.weeklyGoals.map((g) =>
+            g.id === id ? { ...g, done: !g.done } : g,
+          ),
+        })),
+
+      deleteWeeklyGoal: (id) =>
+        set((state) => ({
+          weeklyGoals: state.weeklyGoals.filter((g) => g.id !== id),
+        })),
+
       seedData: (data) => set(() => ({ ...data })),
+
+      exportData: (): GrowthData => {
+        const s = get()
+        return {
+          outputs: s.outputs,
+          reviewers: s.reviewers,
+          roleModels: s.roleModels,
+          upcomingPeople: s.upcomingPeople,
+          inputs: s.inputs,
+          weeklyGoals: s.weeklyGoals,
+        }
+      },
+
+      importData: (data) =>
+        set(() => ({
+          outputs: data.outputs ?? [],
+          reviewers: data.reviewers ?? [],
+          roleModels: data.roleModels ?? [],
+          upcomingPeople: data.upcomingPeople ?? [],
+          inputs: data.inputs ?? [],
+          weeklyGoals: data.weeklyGoals ?? [],
+        })),
 
       resetAll: () =>
         set(() => ({
@@ -173,6 +232,7 @@ export const useGrowthStore = create<GrowthState>()(
           roleModels: [],
           upcomingPeople: [],
           inputs: [],
+          weeklyGoals: [],
         })),
     }),
     {

@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { format } from 'date-fns'
+import { TrendingUp, TrendingDown, Minus, Plus, Trash2, Check } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { useGrowthStore } from '@/stores/growth-store'
 import {
@@ -8,6 +9,7 @@ import {
   weeklyInputs,
   averageSelfScore,
   peerScoredCount,
+  getWeekInterval,
 } from '@/lib/utils'
 
 interface WeeklyReviewModalProps {
@@ -16,7 +18,8 @@ interface WeeklyReviewModalProps {
 }
 
 export function WeeklyReviewModal({ open, onClose }: WeeklyReviewModalProps) {
-  const { outputs, inputs } = useGrowthStore()
+  const { outputs, inputs, weeklyGoals, addWeeklyGoal, toggleWeeklyGoal, deleteWeeklyGoal } = useGrowthStore()
+  const [newGoal, setNewGoal] = useState('')
 
   const weekly = useMemo(() => weeklyOutputs(outputs), [outputs])
   const lastWeek = useMemo(() => lastWeekOutputs(outputs), [outputs])
@@ -28,6 +31,18 @@ export function WeeklyReviewModal({ open, onClose }: WeeklyReviewModalProps) {
 
   const outputDiff = weekly.length - lastWeek.length
   const scoreDiff = Number((avgScore - lastAvgScore).toFixed(1))
+
+  const { start: weekStart } = getWeekInterval()
+  const weekKey = format(weekStart, 'yyyy-MM-dd')
+  const thisWeekGoals = weeklyGoals.filter((g) => g.week === weekKey)
+  const doneCount = thisWeekGoals.filter((g) => g.done).length
+
+  const handleAddGoal = () => {
+    const text = newGoal.trim()
+    if (!text) return
+    addWeeklyGoal({ week: weekKey, goal: text, done: false })
+    setNewGoal('')
+  }
 
   function TrendIcon({ value }: { value: number }) {
     if (value > 0) return <TrendingUp size={14} className="text-done" />
@@ -99,11 +114,67 @@ export function WeeklyReviewModal({ open, onClose }: WeeklyReviewModalProps) {
           </div>
         )}
 
+        {/* 今週の目標 */}
         <div className="bg-primary-bg rounded-lg p-4">
-          <p className="text-[12px] font-medium text-primary mb-1">来週の目標</p>
-          <p className="text-sm text-text-secondary">
-            アウトプット数を{weekly.length + 2}件以上にする
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[12px] font-medium text-primary">今週の目標</p>
+            {thisWeekGoals.length > 0 && (
+              <span className="text-[11px] text-text-tertiary">
+                {doneCount}/{thisWeekGoals.length} 達成
+              </span>
+            )}
+          </div>
+
+          {thisWeekGoals.length > 0 ? (
+            <div className="space-y-1.5 mb-3">
+              {thisWeekGoals.map((goal) => (
+                <div key={goal.id} className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleWeeklyGoal(goal.id)}
+                    className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                      goal.done
+                        ? 'bg-done border-done'
+                        : 'border-border-card hover:border-primary'
+                    }`}
+                  >
+                    {goal.done && <Check size={12} className="text-white" />}
+                  </button>
+                  <span className={`text-sm flex-1 ${goal.done ? 'line-through text-text-tertiary' : 'text-text-primary'}`}>
+                    {goal.goal}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => deleteWeeklyGoal(goal.id)}
+                    className="text-text-tertiary hover:text-red-500 p-0.5 transition-colors"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-text-tertiary mb-3">目標を追加しましょう</p>
+          )}
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newGoal}
+              onChange={(e) => setNewGoal(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddGoal()}
+              placeholder="新しい目標を入力..."
+              className="flex-1 text-sm bg-white rounded-lg border border-border-card px-3 py-2 placeholder:text-text-tertiary focus:outline-none focus:border-primary"
+            />
+            <button
+              type="button"
+              onClick={handleAddGoal}
+              disabled={!newGoal.trim()}
+              className="px-3 py-2 bg-primary text-white rounded-lg text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </Modal>
