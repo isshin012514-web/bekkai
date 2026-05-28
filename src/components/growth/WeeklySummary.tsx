@@ -18,6 +18,7 @@ function MetricCard({ label, value, sub, subColor }: MetricCardProps) {
 }
 
 interface WeeklySummaryProps {
+  inputCount: number
   outputCount: number
   lastWeekOutputCount: number
   selfScoredCount: number
@@ -25,6 +26,7 @@ interface WeeklySummaryProps {
 }
 
 export function WeeklySummary({
+  inputCount,
   outputCount,
   lastWeekOutputCount,
   selfScoredCount,
@@ -37,7 +39,12 @@ export function WeeklySummary({
   return (
     <section className="px-4 pt-4">
       <h2 className="text-sm font-medium text-text-secondary mb-2">今週のサマリー</h2>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-4 gap-2">
+        <MetricCard
+          label="インプット"
+          value={inputCount}
+          sub="件"
+        />
         <MetricCard
           label="アウトプット"
           value={outputCount}

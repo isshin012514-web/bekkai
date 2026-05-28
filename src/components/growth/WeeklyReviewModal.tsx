@@ -51,7 +51,7 @@ export function WeeklyReviewModal({ open, onClose }: WeeklyReviewModalProps) {
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="週次振り返り">
+    <Modal open={open} onClose={onClose} title="週次レポート">
       <div className="space-y-5">
         <div>
           <h3 className="text-sm font-medium mb-3">今週の成績</h3>

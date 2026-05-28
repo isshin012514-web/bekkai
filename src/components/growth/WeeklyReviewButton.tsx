@@ -14,7 +14,7 @@ export function WeeklyReviewButton({ onPress }: WeeklyReviewButtonProps) {
         <div className="flex items-center gap-2">
           <RotateCcw size={16} className="text-text-secondary" />
           <div className="text-left">
-            <p className="text-sm font-medium">週次振り返り</p>
+            <p className="text-sm font-medium">週次レポート</p>
             <p className="text-[11px] text-text-tertiary">日曜 21:00 リマインダー</p>
           </div>
         </div>

@@ -3,17 +3,18 @@ import type { Output, RoleModel, UpcomingPerson } from '@/lib/types'
 import {
   weeklyOutputs,
   lastWeekOutputs,
+  weeklyInputs,
   peerScoredCount,
 } from '@/lib/utils'
 import { GrowthHeader } from './GrowthHeader'
 import { WeeklySummary } from './WeeklySummary'
 import { TodayActions } from './TodayActions'
+import { GrowthCycleSection } from './GrowthCycleSection'
+import { RecordsSection } from './RecordsSection'
 import { RoleModelsSection } from './RoleModelsSection'
 import { UpcomingPeopleSection } from './UpcomingPeopleSection'
-import { RecordsSection } from './RecordsSection'
-import { GrowthCycleSection } from './GrowthCycleSection'
-import { DataManagementSection } from './DataManagementSection'
 import { WeeklyReviewButton } from './WeeklyReviewButton'
+import { DataManagementSection } from './DataManagementSection'
 import { useGrowthStore } from '@/stores/growth-store'
 
 interface GrowthHomeProps {
@@ -45,6 +46,7 @@ export function GrowthHome({
 
   const weekly = useMemo(() => weeklyOutputs(outputs), [outputs])
   const lastWeek = useMemo(() => lastWeekOutputs(outputs), [outputs])
+  const weekInputs = useMemo(() => weeklyInputs(inputs), [inputs])
   const selfScoredWeekly = useMemo(() => weekly.filter((o) => o.self_score > 0).length, [weekly])
   const peerCount = useMemo(() => peerScoredCount(weekly), [weekly])
 
@@ -57,12 +59,14 @@ export function GrowthHome({
     <div className="pb-6">
       <GrowthHeader score={progressScore} maxScore={10} />
       <WeeklySummary
+        inputCount={weekInputs.length}
         outputCount={weekly.length}
         lastWeekOutputCount={lastWeek.length}
         selfScoredCount={selfScoredWeekly}
         peerScoredCount={peerCount}
       />
       <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} onSelfScore={onSelfScore} />
+      <GrowthCycleSection />
       <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} />
       <RoleModelsSection
         roleModels={roleModels}
@@ -76,9 +80,8 @@ export function GrowthHome({
         onSelect={onSelectPerson}
         onAdd={onAddPerson}
       />
-      <GrowthCycleSection />
-      <DataManagementSection />
       <WeeklyReviewButton onPress={onWeeklyReview} />
+      <DataManagementSection />
     </div>
   )
 }
