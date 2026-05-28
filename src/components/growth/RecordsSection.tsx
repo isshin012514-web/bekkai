@@ -13,16 +13,12 @@ const OUTPUT_ICONS: Record<string, typeof Mic> = {
   article: FileText, speech: Mic, product: Package, post: MessageSquare, other: FileText,
 }
 
-/* ── Section 1: IN / OUT ── */
-
 type IOTab = 'all' | 'input' | 'output'
 const IO_TABS: { key: IOTab; label: string }[] = [
   { key: 'all', label: 'すべて' },
   { key: 'input', label: 'INPUT' },
   { key: 'output', label: 'OUTPUT' },
 ]
-
-/* ── Section 2: 自己採点/フィードバック記録 ── */
 
 type ScoreTab = 'all' | 'self' | 'feedback'
 const SCORE_TABS: { key: ScoreTab; label: string }[] = [
@@ -38,8 +34,10 @@ interface RecordsSectionProps {
 }
 
 export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSectionProps) {
-  const [activeIOTab, setActiveIOTab] = useState<IOTab | null>(null)
-  const [activeScoreTab, setActiveScoreTab] = useState<ScoreTab | null>(null)
+  const [ioOpen, setIoOpen] = useState(false)
+  const [scoreOpen, setScoreOpen] = useState(false)
+  const [ioTab, setIoTab] = useState<IOTab>('all')
+  const [scoreTab, setScoreTab] = useState<ScoreTab>('all')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const inputCount = inputs.length
@@ -49,7 +47,6 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
   const reviewedOutputs = outputs.filter((o) => o.peer_score != null)
   const feedbackCount = reviewedOutputs.length
 
-  /* ── 自己 vs 他者 比較 ── */
   const avgSelf = reviewedOutputs.length > 0
     ? reviewedOutputs.reduce((s, o) => s + o.self_score, 0) / reviewedOutputs.length
     : null
@@ -58,7 +55,6 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
     : null
   const gap = avgSelf != null && avgPeer != null ? avgSelf - avgPeer : null
 
-  /* ── IO items ── */
   type IOItem = { kind: 'input'; data: Input; at: string } | { kind: 'output'; data: Output; at: string }
   const ioItems: IOItem[] = [
     ...inputs.map((i): IOItem => ({ kind: 'input', data: i, at: i.created_at })),
@@ -66,11 +62,10 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
   ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
 
   const filteredIO = ioItems.filter((item) => {
-    if (activeIOTab === 'all') return true
-    return item.kind === activeIOTab
+    if (ioTab === 'all') return true
+    return item.kind === ioTab
   })
 
-  /* ── Score items ── */
   type ScoreItem = { kind: 'self'; data: Output; at: string } | { kind: 'feedback'; data: Output; at: string }
   const scoreItems: ScoreItem[] = [
     ...scoredOutputs.map((o): ScoreItem => ({ kind: 'self', data: o, at: o.scored_at ?? o.created_at })),
@@ -78,27 +73,9 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
   ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
 
   const filteredScore = scoreItems.filter((item) => {
-    if (activeScoreTab === 'all') return true
-    return item.kind === activeScoreTab
+    if (scoreTab === 'all') return true
+    return item.kind === scoreTab
   })
-
-  const handleIOTabClick = (key: IOTab) => {
-    if (activeIOTab === key) {
-      setActiveIOTab(null)
-      setExpandedId(null)
-    } else {
-      setActiveIOTab(key)
-    }
-  }
-
-  const handleScoreTabClick = (key: ScoreTab) => {
-    if (activeScoreTab === key) {
-      setActiveScoreTab(null)
-      setExpandedId(null)
-    } else {
-      setActiveScoreTab(key)
-    }
-  }
 
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id))
@@ -107,43 +84,96 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
   return (
     <>
       {/* ── Section 1: IN / OUT 記録 ── */}
-      <section className="mx-4 mt-6 border border-border-card rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium">IN / OUT 記録</h2>
-          <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
-            <span>IN {inputCount}</span>
-            <span>OUT {outputCount}</span>
+      <section className="mx-4 mt-6 border border-border-card rounded-lg">
+        <button
+          onClick={() => { setIoOpen(!ioOpen); setExpandedId(null) }}
+          className="w-full flex items-center justify-between p-4 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-medium">IN / OUT 記録</h2>
+            <div className="flex items-center gap-1.5 text-[11px] text-text-tertiary">
+              <span>IN {inputCount}</span>
+              <span>OUT {outputCount}</span>
+            </div>
           </div>
-        </div>
+          {ioOpen ? <ChevronUp size={16} className="text-text-tertiary" /> : <ChevronDown size={16} className="text-text-tertiary" />}
+        </button>
 
-        <div className="flex gap-1">
-          {IO_TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => handleIOTabClick(t.key)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1 ${
-                activeIOTab === t.key
-                  ? 'bg-primary text-white'
-                  : 'bg-surface-secondary text-text-secondary hover:bg-surface'
-              }`}
-            >
-              {t.label}
-              {activeIOTab === t.key ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-            </button>
-          ))}
-        </div>
+        {ioOpen && (
+          <div className="px-4 pb-4">
+            <div className="flex gap-1 mb-3">
+              {IO_TABS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setIoTab(t.key)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                    ioTab === t.key
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-secondary text-text-secondary hover:bg-surface'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-        {activeIOTab !== null && (
-          <div className="space-y-0.5 mt-3">
-            {filteredIO.length === 0 && (
-              <p className="text-sm text-text-tertiary text-center py-4">まだ記録がありません</p>
-            )}
-            {filteredIO.map((item, i) => {
-              if (item.kind === 'input') {
-                const input = item.data as Input
-                const Icon = INPUT_ICONS[input.type] ?? FileText
-                const itemId = `in-${input.id}`
-                const isExpanded = expandedId === itemId
+            <div className="space-y-0.5">
+              {filteredIO.length === 0 && (
+                <p className="text-sm text-text-tertiary text-center py-4">まだ記録がありません</p>
+              )}
+              {filteredIO.map((item, i) => {
+                if (item.kind === 'input') {
+                  const input = item.data as Input
+                  const Icon = INPUT_ICONS[input.type] ?? FileText
+                  const itemId = `in-${input.id}`
+                  const isExp = expandedId === itemId
+                  return (
+                    <div key={`${itemId}-${i}`}>
+                      <button
+                        onClick={() => toggleExpand(itemId)}
+                        className="w-full flex items-center gap-2.5 py-2 px-2 rounded-lg hover:bg-surface-secondary transition-colors text-left"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-primary-bg flex items-center justify-center shrink-0">
+                          <Icon size={13} className="text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm truncate">{input.title}</p>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] px-1 py-0.5 rounded bg-primary-bg text-primary font-medium">IN</span>
+                            <span className="text-[11px] text-text-tertiary">{INPUT_TYPE_LABELS[input.type]}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[11px] text-text-tertiary">
+                            {formatDistanceToNow(new Date(input.created_at), { locale: ja, addSuffix: false })}
+                          </span>
+                          {isExp ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
+                        </div>
+                      </button>
+                      {isExp && (
+                        <div className="ml-11 mr-2 mb-2 bg-surface-secondary rounded-lg p-3 space-y-2">
+                          <div className="flex items-center gap-3 text-[12px]">
+                            <span className="text-text-tertiary">種別</span>
+                            <span className="text-text-primary">{INPUT_TYPE_LABELS[input.type]}</span>
+                          </div>
+                          {input.learning && (
+                            <div className="text-[12px]">
+                              <span className="text-text-tertiary">学び・メモ</span>
+                              <p className="text-text-primary mt-0.5">{input.learning}</p>
+                            </div>
+                          )}
+                          <div className="text-[11px] text-text-tertiary">
+                            {format(new Date(input.created_at), 'yyyy/MM/dd HH:mm', { locale: ja })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                }
+                const output = item.data as Output
+                const Icon = OUTPUT_ICONS[output.type] ?? FileText
+                const itemId = `out-${output.id}`
+                const isExp = expandedId === itemId
                 return (
                   <div key={`${itemId}-${i}`}>
                     <button
@@ -154,146 +184,105 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                         <Icon size={13} className="text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">{input.title}</p>
+                        <p className="text-sm truncate">{output.title}</p>
                         <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] px-1 py-0.5 rounded bg-primary-bg text-primary font-medium">IN</span>
-                          <span className="text-[11px] text-text-tertiary">{INPUT_TYPE_LABELS[input.type]}</span>
+                          <span className="text-[10px] px-1 py-0.5 rounded bg-waiting-bg text-waiting font-medium">OUT</span>
+                          <span className="text-[11px] text-text-tertiary">{OUTPUT_TYPE_LABELS[output.type]}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         <span className="text-[11px] text-text-tertiary">
-                          {formatDistanceToNow(new Date(input.created_at), { locale: ja, addSuffix: false })}
+                          {formatDistanceToNow(new Date(output.created_at), { locale: ja, addSuffix: false })}
                         </span>
-                        {isExpanded ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
+                        {isExp ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
                       </div>
                     </button>
-                    {isExpanded && (
+                    {isExp && (
                       <div className="ml-11 mr-2 mb-2 bg-surface-secondary rounded-lg p-3 space-y-2">
                         <div className="flex items-center gap-3 text-[12px]">
                           <span className="text-text-tertiary">種別</span>
-                          <span className="text-text-primary">{INPUT_TYPE_LABELS[input.type]}</span>
+                          <span className="text-text-primary">{OUTPUT_TYPE_LABELS[output.type]}</span>
                         </div>
-                        {input.learning && (
+                        {output.audience && (
+                          <div className="flex items-center gap-3 text-[12px]">
+                            <span className="text-text-tertiary">対象</span>
+                            <span className="text-text-primary">{output.audience}</span>
+                          </div>
+                        )}
+                        {output.audience_reaction && (
                           <div className="text-[12px]">
-                            <span className="text-text-tertiary">学び・メモ</span>
-                            <p className="text-text-primary mt-0.5">{input.learning}</p>
+                            <span className="text-text-tertiary">聴衆の反応</span>
+                            <p className="text-text-primary mt-0.5">{output.audience_reaction}</p>
+                          </div>
+                        )}
+                        {output.has_visuals && (
+                          <div className="flex items-center gap-1.5 text-[12px] text-text-secondary">
+                            <Image size={12} />
+                            <span>図式・資料あり</span>
+                          </div>
+                        )}
+                        {output.memo && (
+                          <div className="text-[12px]">
+                            <span className="text-text-tertiary">メモ</span>
+                            <p className="text-text-primary mt-0.5">{output.memo}</p>
                           </div>
                         )}
                         <div className="text-[11px] text-text-tertiary">
-                          {format(new Date(input.created_at), 'yyyy/MM/dd HH:mm', { locale: ja })}
+                          {format(new Date(output.created_at), 'yyyy/MM/dd HH:mm', { locale: ja })}
                         </div>
+                        <button
+                          onClick={() => onSelectOutput(output)}
+                          className="text-[11px] text-primary hover:underline"
+                        >
+                          詳細を見る
+                        </button>
                       </div>
                     )}
                   </div>
                 )
-              }
-              const output = item.data as Output
-              const Icon = OUTPUT_ICONS[output.type] ?? FileText
-              const itemId = `out-${output.id}`
-              const isExpanded = expandedId === itemId
-              return (
-                <div key={`${itemId}-${i}`}>
-                  <button
-                    onClick={() => toggleExpand(itemId)}
-                    className="w-full flex items-center gap-2.5 py-2 px-2 rounded-lg hover:bg-surface-secondary transition-colors text-left"
-                  >
-                    <div className="w-7 h-7 rounded-full bg-primary-bg flex items-center justify-center shrink-0">
-                      <Icon size={13} className="text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">{output.title}</p>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] px-1 py-0.5 rounded bg-waiting-bg text-waiting font-medium">OUT</span>
-                        <span className="text-[11px] text-text-tertiary">{OUTPUT_TYPE_LABELS[output.type]}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="text-[11px] text-text-tertiary">
-                        {formatDistanceToNow(new Date(output.created_at), { locale: ja, addSuffix: false })}
-                      </span>
-                      {isExpanded ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
-                    </div>
-                  </button>
-                  {isExpanded && (
-                    <div className="ml-11 mr-2 mb-2 bg-surface-secondary rounded-lg p-3 space-y-2">
-                      <div className="flex items-center gap-3 text-[12px]">
-                        <span className="text-text-tertiary">種別</span>
-                        <span className="text-text-primary">{OUTPUT_TYPE_LABELS[output.type]}</span>
-                      </div>
-                      {output.audience && (
-                        <div className="flex items-center gap-3 text-[12px]">
-                          <span className="text-text-tertiary">対象</span>
-                          <span className="text-text-primary">{output.audience}</span>
-                        </div>
-                      )}
-                      {output.audience_reaction && (
-                        <div className="text-[12px]">
-                          <span className="text-text-tertiary">聴衆の反応</span>
-                          <p className="text-text-primary mt-0.5">{output.audience_reaction}</p>
-                        </div>
-                      )}
-                      {output.has_visuals && (
-                        <div className="flex items-center gap-1.5 text-[12px] text-text-secondary">
-                          <Image size={12} />
-                          <span>図式・資料あり</span>
-                        </div>
-                      )}
-                      {output.memo && (
-                        <div className="text-[12px]">
-                          <span className="text-text-tertiary">メモ</span>
-                          <p className="text-text-primary mt-0.5">{output.memo}</p>
-                        </div>
-                      )}
-                      <div className="text-[11px] text-text-tertiary">
-                        {format(new Date(output.created_at), 'yyyy/MM/dd HH:mm', { locale: ja })}
-                      </div>
-                      <button
-                        onClick={() => onSelectOutput(output)}
-                        className="text-[11px] text-primary hover:underline"
-                      >
-                        詳細を見る
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+              })}
+            </div>
           </div>
         )}
       </section>
 
       {/* ── Section 2: 自己採点/フィードバック記録 ── */}
-      <section className="mx-4 mt-4 border border-border-card rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium">自己採点/フィードバック記録</h2>
-          <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
-            <span>自己 {selfCount}件</span>
-            <span>FB {feedbackCount}件</span>
+      <section className="mx-4 mt-4 border border-border-card rounded-lg">
+        <button
+          onClick={() => { setScoreOpen(!scoreOpen); setExpandedId(null) }}
+          className="w-full flex items-center justify-between p-4 text-left"
+        >
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-medium">自己採点/フィードバック記録</h2>
+            <div className="flex items-center gap-1.5 text-[11px] text-text-tertiary">
+              <span>自己 {selfCount}件</span>
+              <span>FB {feedbackCount}件</span>
+            </div>
           </div>
-        </div>
+          {scoreOpen ? <ChevronUp size={16} className="text-text-tertiary" /> : <ChevronDown size={16} className="text-text-tertiary" />}
+        </button>
 
-        <div className="flex gap-1">
-          {SCORE_TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => handleScoreTabClick(t.key)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors flex items-center gap-1 ${
-                activeScoreTab === t.key
-                  ? 'bg-primary text-white'
-                  : 'bg-surface-secondary text-text-secondary hover:bg-surface'
-              }`}
-            >
-              {t.label}
-              {activeScoreTab === t.key ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-            </button>
-          ))}
-        </div>
+        {scoreOpen && (
+          <div className="px-4 pb-4">
+            <div className="flex gap-1 mb-3">
+              {SCORE_TABS.map((t) => (
+                <button
+                  key={t.key}
+                  onClick={() => setScoreTab(t.key)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-colors ${
+                    scoreTab === t.key
+                      ? 'bg-primary text-white'
+                      : 'bg-surface-secondary text-text-secondary hover:bg-surface'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-        {activeScoreTab !== null && (
-          <>
             {/* 自己 vs 他者 比較カード */}
             {avgSelf != null && avgPeer != null && gap != null && (
-              <div className="bg-surface-secondary rounded-lg p-3 mt-3">
+              <div className="bg-surface-secondary rounded-lg p-3 mb-3">
                 <p className="text-[11px] text-text-tertiary mb-2">他者との比較（採点済み{reviewedOutputs.length}件）</p>
                 <div className="flex items-center gap-4 mb-2">
                   <div className="flex-1 text-center">
@@ -332,7 +321,7 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
               </div>
             )}
 
-            <div className="space-y-0.5 mt-3">
+            <div className="space-y-0.5">
               {filteredScore.length === 0 && (
                 <p className="text-sm text-text-tertiary text-center py-4">まだ採点がありません</p>
               )}
@@ -341,7 +330,7 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                   const output = item.data
                   const detail = output.self_score_detail
                   const itemId = `self-${output.id}`
-                  const isExpanded = expandedId === itemId
+                  const isExp = expandedId === itemId
                   return (
                     <div key={`${itemId}-${i}`}>
                       <button
@@ -353,18 +342,16 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm truncate">{output.title}</p>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-text-secondary">自己 {output.self_score.toFixed(1)}</span>
-                          </div>
+                          <span className="text-[11px] text-text-secondary">自己 {output.self_score.toFixed(1)}</span>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span className="text-[11px] text-text-tertiary">
                             {formatDistanceToNow(new Date(output.scored_at ?? output.created_at), { locale: ja, addSuffix: false })}
                           </span>
-                          {isExpanded ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
+                          {isExp ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
                         </div>
                       </button>
-                      {isExpanded && (
+                      {isExp && (
                         <div className="ml-11 mr-2 mb-2 bg-surface-secondary rounded-lg p-3 space-y-2">
                           <div className="flex items-center justify-between text-[12px]">
                             <span className="text-text-tertiary">総合スコア</span>
@@ -400,10 +387,7 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                               採点日: {format(new Date(output.scored_at), 'yyyy/MM/dd HH:mm', { locale: ja })}
                             </div>
                           )}
-                          <button
-                            onClick={() => onSelectOutput(output)}
-                            className="text-[11px] text-primary hover:underline"
-                          >
+                          <button onClick={() => onSelectOutput(output)} className="text-[11px] text-primary hover:underline">
                             詳細を見る
                           </button>
                         </div>
@@ -412,10 +396,9 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                   )
                 }
 
-                // feedback
                 const output = item.data
                 const itemId = `fb-${output.id}`
-                const isExpanded = expandedId === itemId
+                const isExp = expandedId === itemId
                 return (
                   <div key={`${itemId}-${i}`}>
                     <button
@@ -440,10 +423,10 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                         <span className="text-[11px] text-text-tertiary">
                           {formatDistanceToNow(new Date(output.peer_scored_at!), { locale: ja, addSuffix: false })}
                         </span>
-                        {isExpanded ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
+                        {isExp ? <ChevronUp size={12} className="text-text-tertiary" /> : <ChevronDown size={12} className="text-text-tertiary" />}
                       </div>
                     </button>
-                    {isExpanded && (
+                    {isExp && (
                       <div className="ml-11 mr-2 mb-2 bg-surface-secondary rounded-lg p-3 space-y-2">
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
@@ -483,10 +466,7 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                             評価日: {format(new Date(output.peer_scored_at), 'yyyy/MM/dd HH:mm', { locale: ja })}
                           </div>
                         )}
-                        <button
-                          onClick={() => onSelectOutput(output)}
-                          className="text-[11px] text-primary hover:underline"
-                        >
+                        <button onClick={() => onSelectOutput(output)} className="text-[11px] text-primary hover:underline">
                           詳細を見る
                         </button>
                       </div>
@@ -495,7 +475,7 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                 )
               })}
             </div>
-          </>
+          </div>
         )}
       </section>
     </>

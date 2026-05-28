@@ -8,6 +8,7 @@ import {
 } from '@/lib/utils'
 import { GrowthHeader } from './GrowthHeader'
 import { WeeklySummary } from './WeeklySummary'
+import { WeeklyGoalsDisplay } from './WeeklyGoalsDisplay'
 import { TodayActions } from './TodayActions'
 import { GrowthCycleSection } from './GrowthCycleSection'
 import { RecordsSection } from './RecordsSection'
@@ -65,6 +66,7 @@ export function GrowthHome({
         selfScoredCount={selfScoredWeekly}
         peerScoredCount={peerCount}
       />
+      <WeeklyGoalsDisplay />
       <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} onSelfScore={onSelfScore} />
       <GrowthCycleSection />
       <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} />
