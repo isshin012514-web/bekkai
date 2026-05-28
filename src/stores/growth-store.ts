@@ -10,6 +10,7 @@ interface GrowthData {
   upcomingPeople: UpcomingPerson[]
   inputs: Input[]
   weeklyGoals: WeeklyGoal[]
+  lastWeeklyReportViewedAt?: string
 }
 
 interface GrowthState extends GrowthData {
@@ -39,6 +40,8 @@ interface GrowthState extends GrowthData {
   updateWeeklyGoal: (id: string, data: Partial<WeeklyGoal>) => void
   toggleWeeklyGoal: (id: string) => void
   deleteWeeklyGoal: (id: string) => void
+
+  markWeeklyReportViewed: () => void
 
   seedData: (data: {
     outputs: Output[]
@@ -201,6 +204,8 @@ export const useGrowthStore = create<GrowthState>()(
           weeklyGoals: state.weeklyGoals.filter((g) => g.id !== id),
         })),
 
+      markWeeklyReportViewed: () => set(() => ({ lastWeeklyReportViewedAt: nowISO() })),
+
       seedData: (data) => set(() => ({ ...data })),
 
       exportData: (): GrowthData => {
@@ -212,6 +217,7 @@ export const useGrowthStore = create<GrowthState>()(
           upcomingPeople: s.upcomingPeople,
           inputs: s.inputs,
           weeklyGoals: s.weeklyGoals,
+          lastWeeklyReportViewedAt: s.lastWeeklyReportViewedAt,
         }
       },
 
