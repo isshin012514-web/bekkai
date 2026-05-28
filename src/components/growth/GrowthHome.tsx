@@ -3,7 +3,6 @@ import type { Output, RoleModel, UpcomingPerson } from '@/lib/types'
 import {
   weeklyOutputs,
   lastWeekOutputs,
-  averageSelfScore,
   peerScoredCount,
 } from '@/lib/utils'
 import { GrowthHeader } from './GrowthHeader'
@@ -46,7 +45,7 @@ export function GrowthHome({
 
   const weekly = useMemo(() => weeklyOutputs(outputs), [outputs])
   const lastWeek = useMemo(() => lastWeekOutputs(outputs), [outputs])
-  const avgScore = useMemo(() => averageSelfScore(weekly), [weekly])
+  const selfScoredWeekly = useMemo(() => weekly.filter((o) => o.self_score > 0).length, [weekly])
   const peerCount = useMemo(() => peerScoredCount(weekly), [weekly])
 
   const metPeople = upcomingPeople.filter((p) => p.met)
@@ -60,7 +59,7 @@ export function GrowthHome({
       <WeeklySummary
         outputCount={weekly.length}
         lastWeekOutputCount={lastWeek.length}
-        avgSelfScore={avgScore}
+        selfScoredCount={selfScoredWeekly}
         peerScoredCount={peerCount}
       />
       <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} onSelfScore={onSelfScore} />

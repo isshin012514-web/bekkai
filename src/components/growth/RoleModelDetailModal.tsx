@@ -47,6 +47,13 @@ export function RoleModelDetailModal({ open, onClose, roleModel }: RoleModelDeta
           </div>
         </div>
 
+        {roleModel.admire_point && (
+          <div className="bg-primary-bg rounded-lg p-3">
+            <p className="text-[11px] text-primary font-medium mb-1">ロールモデルにした理由</p>
+            <p className="text-sm text-text-primary">{roleModel.admire_point}</p>
+          </div>
+        )}
+
         <div>
           <p className="text-[12px] font-medium text-text-secondary mb-2">学びメモ</p>
           <div className="flex gap-2 mb-3">

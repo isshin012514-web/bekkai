@@ -34,6 +34,7 @@ export const roleModelSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
   initials: z.string().min(1, '頭文字は必須です').max(4, '4文字以内'),
   color_key: z.enum(['purple', 'teal', 'coral', 'amber', 'blue']),
+  admire_point: z.string().optional(),
 })
 
 export type RoleModelFormValues = z.infer<typeof roleModelSchema>

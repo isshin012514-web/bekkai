@@ -28,13 +28,14 @@ export function AddRoleModelModal({ open, onClose }: AddRoleModelModalProps) {
       name: '',
       initials: '',
       color_key: 'purple',
+      admire_point: '',
     },
   })
 
   const selectedColor = watch('color_key')
 
   const onSubmit = (data: RoleModelFormValues) => {
-    addRoleModel({ ...data, learning_notes: [] })
+    addRoleModel({ ...data, admire_point: data.admire_point || undefined, learning_notes: [] })
     reset()
     onClose()
   }
@@ -74,6 +75,18 @@ export function AddRoleModelModal({ open, onClose }: AddRoleModelModalProps) {
           {errors.initials && (
             <p className="text-[11px] text-red-500 mt-1">{errors.initials.message}</p>
           )}
+        </div>
+
+        <div>
+          <label className="block text-[12px] font-medium text-text-secondary mb-1">
+            どんなところをロールモデルにしたか
+          </label>
+          <textarea
+            {...register('admire_point')}
+            rows={2}
+            placeholder="例：独自の視点で常識を覆す発想力、逆境でも折れないメンタル"
+            className="w-full px-3 py-2.5 border border-border-card rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none bg-surface"
+          />
         </div>
 
         <div>

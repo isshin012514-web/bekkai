@@ -126,7 +126,10 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate">{input.title}</p>
-                    <p className="text-[11px] text-text-tertiary">{INPUT_TYPE_LABELS[input.type]}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] px-1 py-0.5 rounded bg-primary-bg text-primary font-medium">IN</span>
+                      <span className="text-[11px] text-text-tertiary">{INPUT_TYPE_LABELS[input.type]}</span>
+                    </div>
                   </div>
                   <span className="text-[11px] text-text-tertiary shrink-0">
                     {formatDistanceToNow(new Date(input.created_at), { locale: ja, addSuffix: false })}
@@ -142,12 +145,15 @@ export function RecordsSection({ inputs, outputs, onSelectOutput }: RecordsSecti
                 onClick={() => onSelectOutput(output)}
                 className="w-full flex items-center gap-2.5 py-2 px-2 rounded-lg hover:bg-surface-secondary transition-colors text-left"
               >
-                <div className="w-7 h-7 rounded-full bg-waiting-bg flex items-center justify-center shrink-0">
-                  <Icon size={13} className="text-waiting" />
+                <div className="w-7 h-7 rounded-full bg-primary-bg flex items-center justify-center shrink-0">
+                  <Icon size={13} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">{output.title}</p>
-                  <span className="text-[11px] text-text-secondary">{OUTPUT_TYPE_LABELS[output.type]}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] px-1 py-0.5 rounded bg-waiting-bg text-waiting font-medium">OUT</span>
+                    <span className="text-[11px] text-text-tertiary">{OUTPUT_TYPE_LABELS[output.type]}</span>
+                  </div>
                 </div>
                 <span className="text-[11px] text-text-tertiary shrink-0">
                   {formatDistanceToNow(new Date(output.created_at), { locale: ja, addSuffix: false })}

@@ -20,14 +20,14 @@ function MetricCard({ label, value, sub, subColor }: MetricCardProps) {
 interface WeeklySummaryProps {
   outputCount: number
   lastWeekOutputCount: number
-  avgSelfScore: number
+  selfScoredCount: number
   peerScoredCount: number
 }
 
 export function WeeklySummary({
   outputCount,
   lastWeekOutputCount,
-  avgSelfScore,
+  selfScoredCount,
   peerScoredCount,
 }: WeeklySummaryProps) {
   const diff = outputCount - lastWeekOutputCount
@@ -46,8 +46,8 @@ export function WeeklySummary({
         />
         <MetricCard
           label="自己採点"
-          value={avgSelfScore.toFixed(1)}
-          sub="平均"
+          value={selfScoredCount}
+          sub="件"
         />
         <MetricCard
           label="他者採点"

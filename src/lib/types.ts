@@ -48,6 +48,7 @@ export interface RoleModel {
   name: string
   initials: string
   color_key: RoleModelColor
+  admire_point?: string           // どんなところをロールモデルにしたか
   learning_notes: Array<{ at: string; text: string }>
   created_at: string
 }
