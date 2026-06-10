@@ -4,6 +4,7 @@ import {
   Plus, Trash2, Pencil, Sparkles, ChevronDown, ChevronUp,
 } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
+import { SampleControls } from '@/components/SampleControls'
 import { generateId, nowISO } from '@/lib/utils'
 import { emptyFailurePower, RISK_LEVEL_LABELS, J_CURVE_LABELS, RETREAT_DECISION_LABELS } from '@/lib/types'
 import type {
@@ -256,9 +257,11 @@ export function FailurePowerHome() {
   const setFailurePower = useGrowthStore((s) => s.setFailurePower)
   const fp = failurePower
   const save = (next: Partial<FailurePower>) => setFailurePower({ ...fp, ...next })
+  const hasData = Object.values(fp).some((v) => Array.isArray(v) && v.length > 0)
 
   return (
     <div className="pb-6">
+      <SampleControls feature="failure" hasData={hasData} accent="#0D9488" />
       {/* イントロ + 成長サイクル内の位置づけ */}
       <div className="mx-4 mt-4 bg-fail-bg rounded-lg px-4 py-3">
         <p className="text-[11px] text-fail leading-relaxed">

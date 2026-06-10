@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Plus, ChevronLeft, Trash2, Star } from 'lucide-react'
 import type { BekkaiAxis } from '@/lib/types'
 import { useBekkaiStore } from '@/stores/bekkai-store'
+import { SampleControls } from '@/components/SampleControls'
 import { BekkaiVenn } from './BekkaiVenn'
 import { HintTicker } from './HintTicker'
 import { AreaSheet } from './AreaSheet'
@@ -33,6 +34,7 @@ export function BekkaiHome() {
   if (!active) {
     return (
       <div className="pb-6">
+        <SampleControls feature="bekkai" hasData={bekkais.length > 0} accent="#DC2626" />
         <section className="mx-4 mt-4">
           <button onClick={handleNew} className="w-full py-3 rounded-xl text-white text-sm font-semibold flex items-center justify-center gap-1.5" style={{ background: 'linear-gradient(135deg,#DC2626,#F97316)' }}>
             <Plus size={18} />新しい別解をつくる

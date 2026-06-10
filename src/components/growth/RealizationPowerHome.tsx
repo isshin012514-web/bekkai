@@ -4,6 +4,7 @@ import {
   ChevronDown, ChevronUp, Handshake, Sparkles,
 } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
+import { SampleControls } from '@/components/SampleControls'
 import { generateId, nowISO } from '@/lib/utils'
 import {
   emptyRealizationPower, ADJUST_TYPE_LABELS, INVEST_PATTERN_LABELS, COMBINE_STATUS_LABELS,
@@ -425,9 +426,11 @@ export function RealizationPowerHome() {
 
   const rp = realizationPower
   const save = (next: Partial<RealizationPower>) => setRealizationPower({ ...rp, ...next })
+  const hasData = rp.combinations.length > 0 || rp.quantityQualities.length > 0 || rp.team.length > 0 || rp.confidence.trim().length > 0
 
   return (
     <div className="pb-6">
+      <SampleControls feature="realization" hasData={hasData} accent="#EA580C" />
       <div className="mx-4 mt-4 bg-real-bg rounded-lg px-4 py-3">
         <p className="text-[11px] text-real leading-relaxed">
           <Rocket size={12} className="inline mr-1" />

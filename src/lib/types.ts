@@ -285,6 +285,51 @@ export const COMBINE_STATUS_LABELS: Record<CombineStatus, string> = {
   trying: '挑戦中', failed: '失敗', succeeded: '成功',
 }
 
+/** デモ用のサンプル失敗力データ */
+export function demoFailurePower(): FailurePower {
+  return {
+    failureList: [
+      { id: 'demo-f1', content: '勢いで企画を出して準備不足のまま会議に臨み、詰められて撤回', lesson: '前提データを揃えずに走った', avoidance: '会議前日に「想定質問3つ」を必ず作る', avoidable: true, created_at: '2026-05-18T09:00:00.000Z' },
+      { id: 'demo-f2', content: '締切直前にまとめて作業して品質が落ちた', lesson: '後回し癖', avoidance: '着手日をカレンダーに先に固定', avoidable: true, created_at: '2026-05-10T09:00:00.000Z' },
+    ],
+    premortems: [
+      { id: 'demo-p1', risk: '関係者の合意を取らずに進めて手戻りする', probability: 'mid', impact: 'high', countermeasure: '着手前に主要2名へ5分の事前共有', created_at: '2026-05-22T09:00:00.000Z' },
+    ],
+    riskDesigns: [
+      { id: 'demo-r1', challenge: '新しい発信チャネルを試す', risk: 'low', ret: 'mid', toleranceLine: '週2時間まで。1ヶ月反応ゼロなら撤退', created_at: '2026-05-15T09:00:00.000Z' },
+    ],
+    declarations: [
+      { id: 'demo-d1', content: '今月中に試作を1つ公開する', deadline: '2026-06-30', result: 'pending', created_at: '2026-06-01T09:00:00.000Z' },
+    ],
+    retreatJudgments: [
+      { id: 'demo-rj1', target: '新チャネルでの発信', jCurvePhase: 'valley', retreatReason: '', affectedParties: '特になし（自分の時間のみ）', decision: 'continue', nextAlternative: '', created_at: '2026-05-28T09:00:00.000Z' },
+    ],
+    metacognitions: [
+      { id: 'demo-m1', roleModel: '尊敬する先輩', theirJudgment: '小さく出して反応を見てから広げる', diff: '自分は完璧を待ちすぎて出すのが遅い', decisionScore: 3, stayInField: true, created_at: '2026-05-30T09:00:00.000Z' },
+    ],
+  }
+}
+
+/** デモ用のサンプル別解力データ */
+export function demoBekkais(): Bekkai[] {
+  const NOW = '2026-05-25T09:00:00.000Z'
+  return [
+    {
+      id: 'demo-b1',
+      user_id: 'local-user',
+      theme: '自分の学びを「伝わる形」で発信する',
+      self: { score: 80, reason: '現場のリアルな試行錯誤を等身大で語れるのが自分の持ち味', ideas: ['失敗談ベースで書く', '図解を1枚必ず添える'] },
+      excellent: { score: 60, reason: '体系的な「型」はまだ弱いが、わかりやすさは評価される', ideas: ['テンプレ化して量産', '反応の良い構成を分析'] },
+      different: { score: 40, reason: '王道のノウハウ発信とは逆に「うまくいかなかった過程」を主役にする', ideas: ['過程実況スタイル', 'あえて結論を先に出さない'] },
+      downside: '過程重視は冗長になりがち → 冒頭3行に要点を置いて離脱を防ぐ',
+      conclusion: '「等身大の失敗実況 × 1枚図解」で、王道ノウハウに埋もれない自分の発信をつくる',
+      is_key: true,
+      created_at: NOW,
+      updated_at: NOW,
+    },
+  ]
+}
+
 /** デモ用のサンプル実現力データ */
 export function demoRealizationPower(): RealizationPower {
   return {

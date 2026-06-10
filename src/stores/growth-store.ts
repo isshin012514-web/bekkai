@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Output, Reviewer, RoleModel, UpcomingPerson, Input, WeeklyGoal, ActionPlan, FailurePower, RealizationPower } from '@/lib/types'
-import { emptyFailurePower, emptyRealizationPower, demoRealizationPower } from '@/lib/types'
+import { emptyFailurePower, emptyRealizationPower } from '@/lib/types'
 import { generateId, nowISO } from '@/lib/utils'
 
 interface GrowthData {
@@ -80,7 +80,7 @@ export const useGrowthStore = create<GrowthState>()(
       weeklyGoals: [],
       actionPlans: [],
       failurePower: emptyFailurePower(),
-      realizationPower: demoRealizationPower(),
+      realizationPower: emptyRealizationPower(),
 
       addOutput: (data) =>
         set((state) => ({

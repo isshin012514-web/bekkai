@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Icon from './Icon'
 import { useData } from '../DataContext'
 import { useEntriesStore } from '../stores/entries-store'
+import { SampleControls } from '@/components/SampleControls'
 
 const GRID_ORDER = [
   { pos: 0, idx: 0 },
@@ -68,13 +69,12 @@ export default function MandalaHome({ onNavigate }) {
   const totalEntries = allStats.reduce((s, x) => s + x.count, 0)
 
   return (
-    <div className="py-8 space-y-8">
-      <div className="text-center animate-fade space-y-2.5">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface/40">
-          <span className="w-1 h-1 rounded-full bg-accent" />
-          <span className="text-[9px] text-text-dim tracking-label uppercase mono">Mandala · Self Discovery</span>
-        </div>
-        <h1 className="text-[26px] font-bold title-gradient tracking-tight leading-tight">8つの視点で深掘る</h1>
+    <div className="py-5 space-y-5">
+      <div className="-mx-1">
+        <SampleControls feature="discovery" hasData={totalEntries > 0} accent="#7c6cff" />
+      </div>
+      <div className="space-y-1">
+        <h1 className="text-[17px] font-semibold text-text leading-tight">8つの視点で深掘る</h1>
         <p className="text-[11px] text-text-muted">発見力 ― 解くべき問題を解くための力</p>
       </div>
 

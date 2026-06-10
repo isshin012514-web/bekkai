@@ -177,6 +177,37 @@ export const MODULE_DETAILS = {
 export const CELL_ENTRIES = {}
 
 /**
+ * デモ用のサンプル入力。`${moduleId}-${cellId}` をキーに、entries-store と同じ
+ * オブジェクト形（{ id, text, created_at, reason? } / self は level/detail 付き）で持つ。
+ */
+export const DEMO_CELL_ENTRIES = {
+  'purpose-why': [
+    { id: 'd-pw1', text: '学んだことを誰かの役に立つ形にしたい', reason: '自分が独学で苦労した経験があるから', created_at: '2026-05-20T09:00:00.000Z' },
+  ],
+  'purpose-ideal': [
+    { id: 'd-pi1', text: '「あの人の発信で動けた」と言われる存在', created_at: '2026-05-20T09:00:00.000Z' },
+  ],
+  'goal-state': [
+    { id: 'd-gs1', text: '月1本、反応のある発信を継続できている', created_at: '2026-05-21T09:00:00.000Z' },
+  ],
+  'problem-gap': [
+    { id: 'd-pg1', text: 'インプットは多いがアウトプットが続かない', reason: '完璧を求めて出すのが遅れる', created_at: '2026-05-21T09:00:00.000Z' },
+  ],
+  'self-strength': [
+    { id: 'd-ss1', text: '現場の試行錯誤を等身大で言語化できる', level: 4, detail: '失敗込みで語れるので共感されやすい', created_at: '2026-05-22T09:00:00.000Z' },
+  ],
+  'self-weakness': [
+    { id: 'd-sw1', text: '完璧主義で着手・公開が遅い', level: 3, detail: '8割で出す癖をつける', fix: '下書きを翌日までに必ず公開', created_at: '2026-05-22T09:00:00.000Z' },
+  ],
+  'market-customer': [
+    { id: 'd-mc1', text: '自分と同じく独学でつまずいている初学者', created_at: '2026-05-23T09:00:00.000Z' },
+  ],
+  'future-next': [
+    { id: 'd-ft1', text: '発信の型をつくって量産できるようにする', created_at: '2026-05-24T09:00:00.000Z' },
+  ],
+}
+
+/**
  * 自己採点の観点（bekkai の SELF_SCORE_CRITERIA に準拠）。
  * 各観点は 0〜10（0.5刻み）で採点し、総合スコアは平均を0.5刻みに丸める。
  */

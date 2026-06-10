@@ -20,6 +20,7 @@ import { DataHome } from '@/components/data/DataHome'
 import { AppHeader } from '@/components/AppHeader'
 import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
+import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
@@ -51,8 +52,10 @@ function App() {
     tab !== 'data' && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
 
   const [activeTab, setActiveTab] = useState<AppTab>('growth')
+  const [onboardingOpen, setOnboardingOpen] = useState(() => !isOnboarded())
   const [guideOpen, setGuideOpen] = useState(() => {
-    const show = shouldAutoShow('growth')
+    // 初回オンボーディング中は機能ガイドを重ねない
+    const show = isOnboarded() && shouldAutoShow('growth')
     if (show) shownThisSession.current.add('growth')
     return show
   })
@@ -94,8 +97,9 @@ function App() {
 
   return (
     <>
-      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={activeTab === 'data' ? undefined : () => setGuideOpen(true)} />
+      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={activeTab === 'data' ? () => setOnboardingOpen(true) : () => setGuideOpen(true)} />
       {activeTab !== 'data' && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
+      <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
 
       {activeTab === 'growth' && (
         <>
