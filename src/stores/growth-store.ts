@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Output, Reviewer, RoleModel, UpcomingPerson, Input, WeeklyGoal } from '@/lib/types'
+import type { Output, Reviewer, RoleModel, UpcomingPerson, Input, WeeklyGoal, ActionPlan, FailurePower, RealizationPower } from '@/lib/types'
+import { emptyFailurePower, emptyRealizationPower, demoRealizationPower } from '@/lib/types'
 import { generateId, nowISO } from '@/lib/utils'
 
 interface GrowthData {
@@ -10,6 +11,9 @@ interface GrowthData {
   upcomingPeople: UpcomingPerson[]
   inputs: Input[]
   weeklyGoals: WeeklyGoal[]
+  actionPlans: ActionPlan[]
+  failurePower: FailurePower
+  realizationPower: RealizationPower
   lastWeeklyReportViewedAt?: string
 }
 
@@ -41,6 +45,12 @@ interface GrowthState extends GrowthData {
   toggleWeeklyGoal: (id: string) => void
   deleteWeeklyGoal: (id: string) => void
 
+  upsertActionPlan: (week: string, data: Omit<ActionPlan, 'id' | 'week' | 'created_at'>) => void
+  deleteActionPlan: (id: string) => void
+
+  setFailurePower: (data: FailurePower) => void
+  setRealizationPower: (data: RealizationPower) => void
+
   markWeeklyReportViewed: () => void
 
   seedData: (data: {
@@ -52,7 +62,7 @@ interface GrowthState extends GrowthData {
   }) => void
 
   exportData: () => GrowthData
-  importData: (data: GrowthData) => void
+  importData: (data: Partial<GrowthData>) => void
 
   resetAll: () => void
 }
@@ -68,6 +78,9 @@ export const useGrowthStore = create<GrowthState>()(
       upcomingPeople: [],
       inputs: [],
       weeklyGoals: [],
+      actionPlans: [],
+      failurePower: emptyFailurePower(),
+      realizationPower: demoRealizationPower(),
 
       addOutput: (data) =>
         set((state) => ({
@@ -204,6 +217,32 @@ export const useGrowthStore = create<GrowthState>()(
           weeklyGoals: state.weeklyGoals.filter((g) => g.id !== id),
         })),
 
+      upsertActionPlan: (week, data) =>
+        set((state) => {
+          const existing = state.actionPlans.find((p) => p.week === week)
+          if (existing) {
+            return {
+              actionPlans: state.actionPlans.map((p) =>
+                p.week === week ? { ...p, ...data } : p,
+              ),
+            }
+          }
+          return {
+            actionPlans: [
+              { id: generateId(), week, created_at: nowISO(), ...data },
+              ...state.actionPlans,
+            ],
+          }
+        }),
+
+      deleteActionPlan: (id) =>
+        set((state) => ({
+          actionPlans: state.actionPlans.filter((p) => p.id !== id),
+        })),
+
+      setFailurePower: (data) => set(() => ({ failurePower: data })),
+      setRealizationPower: (data) => set(() => ({ realizationPower: data })),
+
       markWeeklyReportViewed: () => set(() => ({ lastWeeklyReportViewedAt: nowISO() })),
 
       seedData: (data) => set(() => ({ ...data })),
@@ -217,6 +256,9 @@ export const useGrowthStore = create<GrowthState>()(
           upcomingPeople: s.upcomingPeople,
           inputs: s.inputs,
           weeklyGoals: s.weeklyGoals,
+          actionPlans: s.actionPlans,
+          failurePower: s.failurePower,
+          realizationPower: s.realizationPower,
           lastWeeklyReportViewedAt: s.lastWeeklyReportViewedAt,
         }
       },
@@ -229,6 +271,9 @@ export const useGrowthStore = create<GrowthState>()(
           upcomingPeople: data.upcomingPeople ?? [],
           inputs: data.inputs ?? [],
           weeklyGoals: data.weeklyGoals ?? [],
+          actionPlans: data.actionPlans ?? [],
+          failurePower: { ...emptyFailurePower(), ...(data.failurePower ?? {}) },
+          realizationPower: { ...emptyRealizationPower(), ...(data.realizationPower ?? {}) },
         })),
 
       resetAll: () =>
@@ -239,6 +284,9 @@ export const useGrowthStore = create<GrowthState>()(
           upcomingPeople: [],
           inputs: [],
           weeklyGoals: [],
+          actionPlans: [],
+          failurePower: emptyFailurePower(),
+          realizationPower: emptyRealizationPower(),
         })),
     }),
     {

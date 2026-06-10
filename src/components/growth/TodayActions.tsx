@@ -1,13 +1,15 @@
-import { BookOpen, ArrowDown, PenLine, Share2, Plus } from 'lucide-react'
+import { BookOpen, ArrowDown, PenLine, Plus, MessageSquare, Zap } from 'lucide-react'
 
 interface TodayActionsProps {
   onAddOutput: () => void
-  onRequestReview: () => void
   onAddInput: () => void
   onSelfScore: () => void
+  onEnterFeedback: () => void
+  onNextActionPlan: () => void
 }
 
-export function TodayActions({ onAddOutput, onRequestReview, onAddInput, onSelfScore }: TodayActionsProps) {
+export function TodayActions({ onAddOutput, onAddInput, onSelfScore, onEnterFeedback, onNextActionPlan }: TodayActionsProps) {
+
   return (
     <section className="mx-4 mt-4 bg-primary-bg rounded-lg p-4">
       <h2 className="text-sm font-medium text-primary mb-3">アクション</h2>
@@ -45,13 +47,24 @@ export function TodayActions({ onAddOutput, onRequestReview, onAddInput, onSelfS
 
         <ArrowDown size={14} className="text-primary/40 my-1" />
 
-        {/* Step 4: Request Review (with share) */}
+        {/* Step 4: Feedback (依頼＋入力) */}
         <button
-          onClick={onRequestReview}
+          onClick={onEnterFeedback}
           className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-primary/40 text-primary bg-surface rounded-lg text-[12px] font-medium hover:bg-primary-bg transition-colors"
         >
-          <Share2 size={14} />
-          採点依頼
+          <MessageSquare size={14} />
+          フィードバック
+        </button>
+
+        <ArrowDown size={14} className="text-primary/40 my-1" />
+
+        {/* Step 6: Next action plan */}
+        <button
+          onClick={onNextActionPlan}
+          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 border border-primary/40 text-primary bg-surface rounded-lg text-[12px] font-medium hover:bg-primary-bg transition-colors"
+        >
+          <Zap size={14} />
+          次の打ち手を立てる
         </button>
       </div>
     </section>

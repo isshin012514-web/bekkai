@@ -7,11 +7,11 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, sub, subColor }: MetricCardProps) {
   return (
-    <div className="flex-1 bg-surface-secondary rounded-lg px-3 py-3">
-      <p className="text-[11px] text-text-secondary mb-1">{label}</p>
+    <div className="flex-1 bg-surface-secondary rounded-lg px-2 py-3">
+      <p className="text-[10px] text-text-secondary mb-1 whitespace-nowrap leading-tight">{label}</p>
       <p className="text-2xl font-medium leading-none">{value}</p>
       {sub && (
-        <p className={`text-[11px] mt-1 ${subColor ?? 'text-text-tertiary'}`}>{sub}</p>
+        <p className={`text-[10px] mt-1 ${subColor ?? 'text-text-tertiary'}`}>{sub}</p>
       )}
     </div>
   )
@@ -20,7 +20,6 @@ function MetricCard({ label, value, sub, subColor }: MetricCardProps) {
 interface WeeklySummaryProps {
   inputCount: number
   outputCount: number
-  lastWeekOutputCount: number
   selfScoredCount: number
   peerScoredCount: number
 }
@@ -28,39 +27,17 @@ interface WeeklySummaryProps {
 export function WeeklySummary({
   inputCount,
   outputCount,
-  lastWeekOutputCount,
   selfScoredCount,
   peerScoredCount,
 }: WeeklySummaryProps) {
-  const diff = outputCount - lastWeekOutputCount
-  const diffLabel = diff > 0 ? `先週 +${diff}` : diff < 0 ? `先週 ${diff}` : '先週と同じ'
-  const diffColor = diff > 0 ? 'text-done' : diff < 0 ? 'text-waiting' : 'text-text-tertiary'
-
   return (
     <section className="px-4 pt-4">
-      <h2 className="text-sm font-medium text-text-secondary mb-2">今週のサマリー</h2>
+      <h2 className="text-sm font-medium text-text-secondary mb-2">サマリー（累計）</h2>
       <div className="grid grid-cols-4 gap-2">
-        <MetricCard
-          label="インプット"
-          value={inputCount}
-          sub="件"
-        />
-        <MetricCard
-          label="アウトプット"
-          value={outputCount}
-          sub={diffLabel}
-          subColor={diffColor}
-        />
-        <MetricCard
-          label="自己採点"
-          value={selfScoredCount}
-          sub="件"
-        />
-        <MetricCard
-          label="他者採点"
-          value={peerScoredCount}
-          sub="件"
-        />
+        <MetricCard label="IN件数" value={inputCount} sub="件" />
+        <MetricCard label="OUT件数" value={outputCount} sub="件" />
+        <MetricCard label="自己採点" value={selfScoredCount} sub="件" />
+        <MetricCard label="他者採点" value={peerScoredCount} sub="件" />
       </div>
     </section>
   )

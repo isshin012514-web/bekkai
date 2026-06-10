@@ -1,12 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import type { Output, RoleModel, UpcomingPerson } from '@/lib/types'
-import {
-  weeklyOutputs,
-  lastWeekOutputs,
-  weeklyInputs,
-  peerScoredCount,
-} from '@/lib/utils'
-import { GrowthHeader } from './GrowthHeader'
+import { peerScoredCount } from '@/lib/utils'
 import { WeeklySummary } from './WeeklySummary'
 import { WeeklyGoalsDisplay } from './WeeklyGoalsDisplay'
 import { TodayActions } from './TodayActions'
@@ -15,13 +9,14 @@ import { RecordsSection } from './RecordsSection'
 import { RoleModelsSection } from './RoleModelsSection'
 import { UpcomingPeopleSection } from './UpcomingPeopleSection'
 import { WeeklyReviewButton } from './WeeklyReviewButton'
-import { DataManagementSection } from './DataManagementSection'
+import { NextActionPlanSection } from './NextActionPlanSection'
 import { useGrowthStore } from '@/stores/growth-store'
 
 interface GrowthHomeProps {
   onAddOutput: () => void
-  onRequestReview: () => void
+  onRequestReview: (outputId: string) => void
   onSelfScore: () => void
+  onEnterFeedback: () => void
   onSelectOutput: (output: Output) => void
   onSelectRoleModel: (rm: RoleModel) => void
   onAddRoleModel: () => void
@@ -29,12 +24,15 @@ interface GrowthHomeProps {
   onAddPerson: () => void
   onAddInput: () => void
   onWeeklyReview: () => void
+  onOutputFromInput: (inputId: string) => void
+  onNextActionPlan?: () => void
 }
 
 export function GrowthHome({
   onAddOutput,
   onRequestReview,
   onSelfScore,
+  onEnterFeedback,
   onSelectOutput,
   onSelectRoleModel,
   onAddRoleModel,
@@ -42,34 +40,36 @@ export function GrowthHome({
   onAddPerson,
   onAddInput,
   onWeeklyReview,
+  onOutputFromInput,
 }: GrowthHomeProps) {
   const { outputs, roleModels, upcomingPeople, inputs } = useGrowthStore()
+  const nextActionRef = useRef<HTMLElement | null>(null)
 
-  const weekly = useMemo(() => weeklyOutputs(outputs), [outputs])
-  const lastWeek = useMemo(() => lastWeekOutputs(outputs), [outputs])
-  const weekInputs = useMemo(() => weeklyInputs(inputs), [inputs])
-  const selfScoredWeekly = useMemo(() => weekly.filter((o) => o.self_score > 0).length, [weekly])
-  const peerCount = useMemo(() => peerScoredCount(weekly), [weekly])
+  const handleNextActionPlan = () => {
+    setTimeout(() => {
+      nextActionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+
+  const selfScoredTotal = useMemo(() => outputs.filter((o) => o.self_score > 0).length, [outputs])
+  const peerCount = useMemo(() => peerScoredCount(outputs), [outputs])
 
   const metPeople = upcomingPeople.filter((p) => p.met)
   const totalQuestions = upcomingPeople.reduce((sum, p) => sum + p.questions.length, 0)
 
-  const progressScore = Math.min(10, Math.round(weekly.length * 0.8 + peerCount * 0.5))
-
   return (
     <div className="pb-6">
-      <GrowthHeader score={progressScore} maxScore={10} />
       <WeeklySummary
-        inputCount={weekInputs.length}
-        outputCount={weekly.length}
-        lastWeekOutputCount={lastWeek.length}
-        selfScoredCount={selfScoredWeekly}
+        inputCount={inputs.length}
+        outputCount={outputs.length}
+        selfScoredCount={selfScoredTotal}
         peerScoredCount={peerCount}
       />
       <WeeklyGoalsDisplay />
-      <TodayActions onAddOutput={onAddOutput} onRequestReview={onRequestReview} onAddInput={onAddInput} onSelfScore={onSelfScore} />
+      <TodayActions onAddOutput={onAddOutput} onAddInput={onAddInput} onSelfScore={onSelfScore} onEnterFeedback={onEnterFeedback} onNextActionPlan={handleNextActionPlan} />
       <GrowthCycleSection />
-      <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} />
+      <NextActionPlanSection sectionRef={nextActionRef} />
+      <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} onOutputFromInput={onOutputFromInput} onRequestReview={onRequestReview} />
       <RoleModelsSection
         roleModels={roleModels}
         onSelect={onSelectRoleModel}
@@ -83,7 +83,6 @@ export function GrowthHome({
         onAdd={onAddPerson}
       />
       <WeeklyReviewButton onPress={onWeeklyReview} />
-      <DataManagementSection />
     </div>
   )
 }

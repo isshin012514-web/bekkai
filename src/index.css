@@ -30,6 +30,14 @@
     --color-text-primary: #1A1A1A;
     --color-text-secondary: #6B7280;
     --color-text-tertiary: #9CA3AF;
+    /* 失敗力 = ティール（成長力=青 / 発見力=紫 / 別解力=赤 と被らない） */
+    --color-fail: #0D9488;
+    --color-fail-bg: #F0FDFA;
+    --color-fail-danger: #BE123C;
+    --color-fail-danger-bg: #FFF1F2;
+    /* 実現力 = オレンジ（成長=青 / 発見=紫 / 別解=赤 / 失敗=ティール と被らない） */
+    --color-real: #EA580C;
+    --color-real-bg: #FFF4ED;
   }
 
   .dark {
@@ -46,6 +54,12 @@
     --color-text-primary: #F3F4F6;
     --color-text-secondary: #9CA3AF;
     --color-text-tertiary: #6B7280;
+    --color-fail: #2DD4BF;
+    --color-fail-bg: #0E2B28;
+    --color-fail-danger: #FB7185;
+    --color-fail-danger-bg: #2A1518;
+    --color-real: #FB923C;
+    --color-real-bg: #2A1A0E;
   }
 
   *,
@@ -71,3 +85,194 @@
     position: relative;
   }
 }
+
+/* ========== Discovery 8M scoped variables ========== */
+.discovery-scope {
+  --color-bg: #eef0f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3f4fb;
+  --color-surface-3: #e8e9f4;
+  --color-border: #e2e3f0;
+  --color-border-light: #d2d4e6;
+  --color-text: #1a1a2e;
+  --color-text-dim: #56566f;
+  --color-text-muted: #9696b0;
+  --color-accent: #6a5ae0;
+  --color-accent-light: #5a49d8;
+  --color-success: #08a87f;
+  --color-warning: #c98a00;
+  --color-danger: #e25636;
+  --color-info: #2f7fe0;
+  --color-center: #6a5ae0;
+  --color-purpose: #e02d7d;
+  --color-goal: #c98a00;
+  --color-problem: #e25636;
+  --color-past: #6f5ee0;
+  --color-self: #6a5ae0;
+  --color-around: #07a87f;
+  --color-market: #2f7fe0;
+  --color-future: #079e94;
+  --tile-1: #ffffff;
+  --tile-2: #f4f5fb;
+  --glow-1: rgba(124, 108, 255, 0.12);
+  --glow-2: rgba(95, 168, 255, 0.08);
+  --glow-3: rgba(22, 214, 164, 0.06);
+  --ring: rgba(106, 90, 224, 0.4);
+  --shadow-card: 0 1px 2px rgba(60,60,120,0.06), 0 10px 30px rgba(60,60,120,0.10);
+  --shadow-soft: 0 1px 2px rgba(60,60,120,0.05), 0 6px 18px rgba(60,60,120,0.07);
+  --hairline: rgba(255,255,255,0.6);
+}
+
+.dark .discovery-scope {
+  --color-bg: #07070c;
+  --color-surface: #0e0e16;
+  --color-surface-2: #15151f;
+  --color-surface-3: #1d1d2b;
+  --color-border: #21213a;
+  --color-border-light: #32324f;
+  --color-text: #f0f0f7;
+  --color-text-dim: #9b9bbd;
+  --color-text-muted: #5c5c7a;
+  --color-accent: #7c6cff;
+  --color-accent-light: #b3aaff;
+  --color-success: #16d6a4;
+  --color-warning: #ffcd6b;
+  --color-danger: #ff7a59;
+  --color-info: #5fa8ff;
+  --color-center: #7c6cff;
+  --color-purpose: #ff4d97;
+  --color-goal: #ffc34d;
+  --color-problem: #ff7a59;
+  --color-past: #b3aaff;
+  --color-self: #7c6cff;
+  --color-around: #16d6a4;
+  --color-market: #5fa8ff;
+  --color-future: #1fe0d4;
+  --tile-1: #16161f;
+  --tile-2: #0c0c13;
+  --glow-1: rgba(124, 108, 255, 0.16);
+  --glow-2: rgba(95, 168, 255, 0.09);
+  --glow-3: rgba(22, 214, 164, 0.07);
+  --ring: rgba(124, 108, 255, 0.45);
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.36);
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.25), 0 6px 20px rgba(0,0,0,0.28);
+  --hairline: rgba(255,255,255,0.07);
+}
+
+/* Discovery 8M typography */
+.discovery-scope .mono {
+  font-family: 'SF Mono', ui-monospace, 'Menlo', monospace;
+  font-feature-settings: 'tnum';
+}
+.discovery-scope .tracking-label {
+  letter-spacing: 0.18em;
+}
+
+/* Discovery 8M animations */
+@keyframes d8m-fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes d8m-popIn {
+  0% { opacity: 0; transform: scale(0.85) translateY(4px); }
+  60% { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes d8m-glowPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(124, 108, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.12); }
+  50% { box-shadow: 0 0 44px rgba(124, 108, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.18); }
+}
+@keyframes d8m-sheetUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.discovery-scope .animate-fade { animation: d8m-fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.discovery-scope .animate-pop { animation: d8m-popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.discovery-scope .animate-sheet { animation: d8m-sheetUp 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.discovery-scope .glow-pulse { animation: d8m-glowPulse 2.8s ease-in-out infinite; }
+
+.discovery-scope .delay-1 { animation-delay: 0.04s; opacity: 0; }
+.discovery-scope .delay-2 { animation-delay: 0.08s; opacity: 0; }
+.discovery-scope .delay-3 { animation-delay: 0.12s; opacity: 0; }
+.discovery-scope .delay-4 { animation-delay: 0.16s; opacity: 0; }
+.discovery-scope .delay-5 { animation-delay: 0.20s; opacity: 0; }
+.discovery-scope .delay-6 { animation-delay: 0.24s; opacity: 0; }
+.discovery-scope .delay-7 { animation-delay: 0.28s; opacity: 0; }
+.discovery-scope .delay-8 { animation-delay: 0.32s; opacity: 0; }
+
+/* Discovery 8M glass card */
+.discovery-scope .glass {
+  background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: border-color 0.28s ease, box-shadow 0.28s ease;
+}
+:root:not(.dark) .discovery-scope .glass {
+  background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(255,255,255,0.72));
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+/* Discovery 8M tile */
+.discovery-scope .tile {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+  box-shadow: inset 0 1px 0 var(--hairline), var(--shadow-card);
+}
+.discovery-scope .tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255,255,255,0.08), transparent 42%);
+  pointer-events: none;
+}
+.discovery-scope .tile:hover {
+  transform: translateY(-3px) scale(1.018);
+  box-shadow: inset 0 1px 0 var(--hairline), 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px rgba(0,0,0,0.42);
+}
+:root:not(.dark) .discovery-scope .tile::after {
+  background: linear-gradient(160deg, rgba(255,255,255,0.5), transparent 45%);
+}
+:root:not(.dark) .discovery-scope .tile {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 4px 16px rgba(60, 60, 120, 0.07);
+}
+:root:not(.dark) .discovery-scope .tile:hover {
+  box-shadow: inset 0 1px 0 var(--hairline), 0 1px 2px rgba(60,60,120,0.06), 0 16px 36px rgba(60,60,120,0.14);
+}
+.discovery-scope .tile:active {
+  transform: scale(0.97);
+}
+
+/* Discovery 8M title — 単色（グラデーション廃止・他タブと統一） */
+.discovery-scope .title-gradient {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+  color: var(--color-accent);
+}
+:root:not(.dark) .discovery-scope .title-gradient {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: currentColor;
+  color: var(--color-accent);
+}
+
+/* Discovery 8M focus ring */
+.discovery-scope button:focus-visible,
+.discovery-scope a:focus-visible,
+.discovery-scope textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--ring);
+}
+
+.discovery-scope ::selection {
+  background: rgba(124, 108, 255, 0.3);
+}
+
+.discovery-scope ::-webkit-scrollbar { width: 0; height: 0; }

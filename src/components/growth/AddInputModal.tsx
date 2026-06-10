@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { inputSchema, type InputFormValues } from '@/lib/schemas'
 import { INPUT_TYPE_LABELS } from '@/lib/types'
-import type { InputType } from '@/lib/types'
+import type { InputType, Attachment } from '@/lib/types'
 import { Modal } from '@/components/ui/Modal'
+import { AttachmentPicker } from '@/components/ui/AttachmentPicker'
 import { useGrowthStore } from '@/stores/growth-store'
 
 interface AddInputModalProps {
@@ -15,6 +17,7 @@ const INPUT_TYPES: InputType[] = ['book', 'article', 'video', 'dialogue', 'other
 
 export function AddInputModal({ open, onClose }: AddInputModalProps) {
   const addInput = useGrowthStore((s) => s.addInput)
+  const [attachments, setAttachments] = useState<Attachment[]>([])
 
   const {
     register,
@@ -35,13 +38,15 @@ export function AddInputModal({ open, onClose }: AddInputModalProps) {
   const selectedType = watch('type')
 
   const onSubmit = (data: InputFormValues) => {
-    addInput(data)
+    addInput({ ...data, attachments })
     reset()
+    setAttachments([])
     onClose()
   }
 
   const handleClose = () => {
     reset()
+    setAttachments([])
     onClose()
   }
 
@@ -95,6 +100,8 @@ export function AddInputModal({ open, onClose }: AddInputModalProps) {
             className="w-full px-3 py-2.5 border border-border-card rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none bg-surface"
           />
         </div>
+
+        <AttachmentPicker attachments={attachments} onChange={setAttachments} />
 
         <button
           type="submit"

@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>失敗力 — デモ</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            // 失敗力ブランド = ティール（成長力=青 / 発見力=紫 / 別解力=赤 と被らない）
+            primary: { DEFAULT: '#0D9488', bg: '#F0FDFA', light: '#2DD4BF' },
+            done: { DEFAULT: '#0F6E56', bg: '#E1F5EE' },
+            waiting: { DEFAULT: '#854F0B', bg: '#FAEEDA' },
+            // danger = ローズ（別解力の赤と混同しない深い色味）
+            danger: { DEFAULT: '#BE123C', bg: '#FFF1F2' },
+            surface: { DEFAULT: '#FFFFFF', secondary: '#F5F5F0' },
+            'border-card': 'rgba(0,0,0,0.15)',
+            'text-primary': '#1A1A1A',
+            'text-secondary': '#6B7280',
+            'text-tertiary': '#9CA3AF',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body { background: #F5F5F0; -webkit-font-smoothing: antialiased; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" data-presets="react">
+    const { useState } = React;
+
+    // ── 小さなアイコン（インラインSVG） ───────────────────────────
+    const Ic = ({ d, size = 14, cls = '' }) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cls}>{d}</svg>
+    );
+    const Chevron = ({ open }) => <Ic size={16} cls="text-text-tertiary" d={open ? <polyline points="18 15 12 9 6 15"/> : <polyline points="6 9 12 15 18 9"/>} />;
+    const Plus = (p) => <Ic {...p} d={<g><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></g>} />;
+    const Trash = (p) => <Ic {...p} d={<g><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></g>} />;
+    const Spark = (p) => <Ic {...p} d={<path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/>} />;
+
+    let _id = 0; const uid = () => `id${++_id}`;
+
+    // ── 共通アコーディオン枠 ───────────────────────────────────────
+    function Section({ icon, title, sub, badge, children, defaultOpen = false }) {
+      const [open, setOpen] = useState(defaultOpen);
+      return (
+        <section className="mx-4 mt-4 border border-border-card rounded-lg overflow-hidden bg-surface">
+          <button onClick={() => setOpen(o => !o)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-primary-bg text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-primary">{icon}</span>
+              <h2 className="text-sm font-medium text-primary">{title}</h2>
+              <span className="text-[11px] text-text-tertiary">{sub}</span>
+              {badge != null && !open && (
+                <span className="text-[10px] bg-primary text-white rounded-full px-1.5 py-0.5 leading-none">{badge}</span>
+              )}
+            </div>
+            <Chevron open={open} />
+          </button>
+          {open && <div className="border-t border-border-card" />}
+          {open && <div className="p-4">{children}</div>}
+        </section>
+      );
+    }
+
+    const Label = ({ n, text, hint }) => (
+      <p className="text-[11px] font-medium text-text-secondary mb-1.5">
+        {n} {text}<span className="ml-1 text-text-tertiary font-normal">{hint}</span>
+      </p>
+    );
+    const Input = (p) => <input {...p} className="w-full text-[12px] bg-white border border-border-card rounded-lg px-3 py-2 placeholder:text-text-tertiary focus:outline-none focus:border-primary" />;
+
+    // 3段階セレクトチップ
+    function Level({ value, onChange, opts }) {
+      return (
+        <div className="flex gap-1.5">
+          {opts.map(o => (
+            <button key={o.k} onClick={() => onChange(o.k)}
+              className={`flex-1 text-[11px] py-1.5 rounded-lg border transition-colors ${value === o.k ? o.on : 'bg-white border-border-card text-text-secondary'}`}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+      );
+    }
+    const RISK = [
+      { k: 'low', label: 'ロー', on: 'bg-done-bg border-done text-done font-medium' },
+      { k: 'mid', label: 'ミドル', on: 'bg-waiting-bg border-waiting text-waiting font-medium' },
+      { k: 'high', label: 'ハイ', on: 'bg-danger-bg border-danger text-danger font-medium' },
+    ];
+
+    // ① 失敗リスト ────────────────────────────────────────────────
+    function FailureList() {
+      const [items, setItems] = useState([
+        { id: uid(), content: '商談準備不足でヒアリングが浅かった', lesson: '事前質問を用意していなかった', avoidance: '前日に質問を3つ作る', avoidable: true },
+        { id: uid(), content: '見積もり返信が遅れて失注した', lesson: '優先順位をつけずに放置した', avoidance: '依頼は当日中に一次返信する', avoidable: true },
+      ]);
+      const [f, setF] = useState({ content: '', lesson: '', avoidance: '', avoidable: true });
+      const [adding, setAdding] = useState(false);
+      const [onlyAvoidable, setOnlyAvoidable] = useState(false);
+      const add = () => { if (!f.content.trim()) return; setItems([{ ...f, id: uid() }, ...items]); setF({ content: '', lesson: '', avoidance: '', avoidable: true }); setAdding(false); };
+      const shown = onlyAvoidable ? items.filter(i => i.avoidable) : items;
+      return (
+        <Section icon={<Ic d={<g><path d="M14 9V5a3 3 0 0 0-6 0v4"/><rect x="2" y="9" width="20" height="11" rx="2"/></g>} />}
+                 title="失敗リスト" sub="日々更新・回避できる失敗を蓄積" badge={items.length} defaultOpen>
+          <p className="text-[11px] text-text-tertiary mb-3 leading-relaxed bg-surface-secondary rounded-lg px-3 py-2">
+            成功の再現性はないが、失敗はみんなほとんど同じ。回避できる失敗は仕組みで回避する。
+          </p>
+          <div className="flex items-center justify-between mb-2">
+            <button onClick={() => setOnlyAvoidable(v => !v)}
+              className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${onlyAvoidable ? 'bg-primary text-white border-primary' : 'border-border-card text-text-secondary'}`}>
+              回避できる失敗のみ
+            </button>
+            <span className="text-[10px] text-text-tertiary">{shown.length}件</span>
+          </div>
+          <div className="space-y-2">
+            {shown.map(i => (
+              <div key={i.id} className="bg-white border border-border-card rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <span className="text-[12px] text-text-primary flex-1 font-medium">{i.content}</span>
+                  {i.avoidable && <span className="text-[9px] bg-done-bg text-done rounded px-1.5 py-0.5 shrink-0 font-medium">回避可</span>}
+                </div>
+                {i.lesson && <p className="text-[11px] text-text-secondary mt-1.5">教訓: {i.lesson}</p>}
+                {i.avoidance && <p className="text-[11px] text-primary mt-0.5">→ {i.avoidance}</p>}
+              </div>
+            ))}
+          </div>
+          {adding ? (
+            <div className="mt-3 space-y-2 border-t border-border-card pt-3">
+              <Input placeholder="失敗内容" value={f.content} onChange={e => setF({ ...f, content: e.target.value })} />
+              <Input placeholder="原因 / 教訓" value={f.lesson} onChange={e => setF({ ...f, lesson: e.target.value })} />
+              <Input placeholder="回避策" value={f.avoidance} onChange={e => setF({ ...f, avoidance: e.target.value })} />
+              <button onClick={() => setF({ ...f, avoidable: !f.avoidable })}
+                className={`text-[11px] px-2.5 py-1 rounded-full border ${f.avoidable ? 'bg-done-bg border-done text-done font-medium' : 'border-border-card text-text-secondary'}`}>
+                {f.avoidable ? '✓ ' : ''}回避できる失敗
+              </button>
+              <div className="flex gap-2 pt-1">
+                <button onClick={add} className="flex-1 py-2 bg-primary text-white rounded-lg text-[12px] font-medium">追加する</button>
+                <button onClick={() => setAdding(false)} className="px-4 py-2 border border-border-card rounded-lg text-[12px] text-text-secondary">キャンセル</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[11px] text-primary mt-3 hover:opacity-70">
+              <Plus size={12} />失敗を記録
+            </button>
+          )}
+        </Section>
+      );
+    }
+
+    // ② 仮想失敗（プリモーテム） ──────────────────────────────────
+    function Premortem() {
+      const [items, setItems] = useState([
+        { id: uid(), risk: '見積もり返信が遅れて失注する', prob: 'mid', impact: 'high', counter: '依頼は当日返信をルール化する' },
+      ]);
+      const [f, setF] = useState({ risk: '', prob: 'mid', impact: 'mid', counter: '' });
+      const [adding, setAdding] = useState(false);
+      const add = () => { if (!f.risk.trim()) return; setItems([...items, { ...f, id: uid() }]); setF({ risk: '', prob: 'mid', impact: 'mid', counter: '' }); setAdding(false); };
+      const suggest = () => { setF({ risk: '準備不足でヒアリングが浅くなる', prob: 'mid', impact: 'high', counter: '前日に質問を3つ作る' }); setAdding(true); };
+      const lvLabel = { low: 'ロー', mid: 'ミドル', high: 'ハイ' };
+      const lvColor = { low: 'text-done', mid: 'text-waiting', high: 'text-danger' };
+      return (
+        <Section icon={<Ic d={<g><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g>} />}
+                 title="仮想失敗" sub="行動の前に失敗を見積もる" badge={items.length}>
+          <p className="text-[11px] text-text-tertiary mb-3 leading-relaxed bg-surface-secondary rounded-lg px-3 py-2">
+            失敗はチャンスロス。立て直すより、先に転びそうな所を想像しておく。
+          </p>
+          <div className="space-y-2">
+            {items.map(i => (
+              <div key={i.id} className="bg-white border border-border-card rounded-lg p-3">
+                <p className="text-[12px] text-text-primary font-medium">{i.risk}</p>
+                <div className="flex gap-3 mt-1.5 text-[10px]">
+                  <span className="text-text-tertiary">確率 <b className={lvColor[i.prob]}>{lvLabel[i.prob]}</b></span>
+                  <span className="text-text-tertiary">影響 <b className={lvColor[i.impact]}>{lvLabel[i.impact]}</b></span>
+                </div>
+                {i.counter && <p className="text-[11px] text-primary mt-1">先回り → {i.counter}</p>}
+              </div>
+            ))}
+          </div>
+          {adding ? (
+            <div className="mt-3 space-y-2.5 border-t border-border-card pt-3">
+              <Input placeholder="想定する失敗" value={f.risk} onChange={e => setF({ ...f, risk: e.target.value })} />
+              <div><p className="text-[10px] text-text-tertiary mb-1">発生確率</p><Level value={f.prob} onChange={k => setF({ ...f, prob: k })} opts={RISK} /></div>
+              <div><p className="text-[10px] text-text-tertiary mb-1">影響度</p><Level value={f.impact} onChange={k => setF({ ...f, impact: k })} opts={[{k:'low',label:'小',on:RISK[0].on},{k:'mid',label:'中',on:RISK[1].on},{k:'high',label:'大',on:RISK[2].on}]} /></div>
+              <Input placeholder="先回りの対策" value={f.counter} onChange={e => setF({ ...f, counter: e.target.value })} />
+              <div className="flex gap-2 pt-1">
+                <button onClick={add} className="flex-1 py-2 bg-primary text-white rounded-lg text-[12px] font-medium">追加する</button>
+                <button onClick={() => setAdding(false)} className="px-4 py-2 border border-border-card rounded-lg text-[12px] text-text-secondary">キャンセル</button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-3 mt-3">
+              <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[11px] text-primary hover:opacity-70"><Plus size={12} />想定を追加</button>
+              <button onClick={suggest} className="flex items-center gap-1 text-[11px] text-primary hover:opacity-70"><Spark size={12} />AI提案</button>
+            </div>
+          )}
+        </Section>
+      );
+    }
+
+    // ③ リスク設計（マトリクス） ─────────────────────────────────
+    function RiskDesign() {
+      const [items, setItems] = useState([
+        { id: uid(), challenge: '新規開拓チャネルを試す', risk: 'low', ret: 'mid', tol: '月5万までの広告費' },
+        { id: uid(), challenge: '大型案件にレバレッジをかける', risk: 'mid', ret: 'high', tol: '金利2%まで・自己資金の範囲' },
+      ]);
+      const [f, setF] = useState({ challenge: '', risk: 'low', ret: 'mid', tol: '' });
+      const [adding, setAdding] = useState(false);
+      const add = () => { if (!f.challenge.trim()) return; setItems([...items, { ...f, id: uid() }]); setF({ challenge: '', risk: 'low', ret: 'mid', tol: '' }); setAdding(false); };
+      // マトリクス座標
+      const order = { low: 0, mid: 1, high: 2 };
+      const zone = (r, ret) => {
+        if ((r === 'low' && ret !== 'low') || (r === 'mid' && ret === 'high')) return 'recommend';
+        if (r === 'high' && ret === 'low') return 'warn';
+        return 'normal';
+      };
+      const cell = (ri, ci) => {
+        // ri: リスク行（上=ハイ）, ci: リターン列（右=ハイ）
+        const r = ['high','mid','low'][ri], ret = ['low','mid','high'][ci];
+        const z = zone(r, ret);
+        const here = items.filter(i => i.risk === r && i.ret === ret);
+        const base = z === 'recommend' ? 'bg-done-bg' : z === 'warn' ? 'bg-danger-bg' : 'bg-surface-secondary';
+        return (
+          <div key={ri+'-'+ci} className={`${base} rounded h-12 flex items-center justify-center relative`}>
+            {here.length > 0 && <span className="w-2 h-2 rounded-full bg-primary" title={here.map(h=>h.challenge).join(', ')} />}
+            {here.length > 1 && <span className="text-[9px] text-primary ml-0.5">×{here.length}</span>}
+          </div>
+        );
+      };
+      return (
+        <Section icon={<Ic d={<g><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></g>} />}
+                 title="リスク設計" sub="リスク×リターンを先に置く" badge={items.length}>
+          <p className="text-[11px] text-text-tertiary mb-3 leading-relaxed bg-surface-secondary rounded-lg px-3 py-2">
+            ローリスク・ミドルリターン / ミドルリスク・ハイリターンを狙う。緑が推奨ゾーン。
+          </p>
+          {/* マトリクス */}
+          <div className="flex gap-1 mb-1">
+            <div className="w-8" />
+            <div className="flex-1 grid grid-cols-3 gap-1">
+              {[0,1,2].map(ci => <div key={ci} className="grid grid-cols-3 gap-1 col-span-1" />)}
+            </div>
+          </div>
+          <div className="flex items-stretch gap-1">
+            <div className="w-8 flex flex-col justify-between text-[9px] text-text-tertiary text-right pr-0.5 py-0.5">
+              <span>リスク高</span><span>中</span><span>低</span>
+            </div>
+            <div className="flex-1 grid grid-rows-3 gap-1">
+              {[0,1,2].map(ri => (
+                <div key={ri} className="grid grid-cols-3 gap-1">{[0,1,2].map(ci => cell(ri, ci))}</div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 text-[9px] text-text-tertiary mt-1 pr-1">
+            <span>← リターン低</span><span>中</span><span>高 →</span>
+          </div>
+          {/* 一覧 */}
+          <div className="space-y-2 mt-3">
+            {items.map(i => (
+              <div key={i.id} className="bg-white border border-border-card rounded-lg p-3">
+                <p className="text-[12px] text-text-primary font-medium">{i.challenge}</p>
+                <div className="flex gap-2 mt-1.5">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-secondary text-text-secondary">リスク {RISK.find(x=>x.k===i.risk).label}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-secondary text-text-secondary">リターン {RISK.find(x=>x.k===i.ret).label}</span>
+                </div>
+                {i.tol && <p className="text-[11px] text-waiting mt-1.5">許容ライン: {i.tol}</p>}
+              </div>
+            ))}
+          </div>
+          {adding ? (
+            <div className="mt-3 space-y-2.5 border-t border-border-card pt-3">
+              <Input placeholder="挑戦内容" value={f.challenge} onChange={e => setF({ ...f, challenge: e.target.value })} />
+              <div><p className="text-[10px] text-text-tertiary mb-1">リスクの大きさ</p><Level value={f.risk} onChange={k => setF({ ...f, risk: k })} opts={RISK} /></div>
+              <div><p className="text-[10px] text-text-tertiary mb-1">期待リターン</p><Level value={f.ret} onChange={k => setF({ ...f, ret: k })} opts={RISK} /></div>
+              <Input placeholder="リスク許容ライン（ここまでなら許せる）" value={f.tol} onChange={e => setF({ ...f, tol: e.target.value })} />
+              <div className="flex gap-2 pt-1">
+                <button onClick={add} className="flex-1 py-2 bg-primary text-white rounded-lg text-[12px] font-medium">追加する</button>
+                <button onClick={() => setAdding(false)} className="px-4 py-2 border border-border-card rounded-lg text-[12px] text-text-secondary">キャンセル</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[11px] text-primary mt-3 hover:opacity-70"><Plus size={12} />挑戦を設計</button>
+          )}
+        </Section>
+      );
+    }
+
+    // ④ 成功宣言 ──────────────────────────────────────────────────
+    function Declaration() {
+      const [items, setItems] = useState([
+        { id: uid(), content: '今月中に新規3件を成約させる', deadline: '2026-06-30', result: 'pending' },
+      ]);
+      const [f, setF] = useState({ content: '', deadline: '' });
+      const [adding, setAdding] = useState(false);
+      const add = () => { if (!f.content.trim()) return; setItems([{ ...f, id: uid(), result: 'pending' }, ...items]); setF({ content: '', deadline: '' }); setAdding(false); };
+      const setResult = (id, r) => setItems(items.map(i => i.id === id ? { ...i, result: r } : i));
+      return (
+        <Section icon={<Ic d={<g><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></g>} />}
+                 title="成功宣言" sub="先に宣言して言い訳をなくす" badge={items.length}>
+          <p className="text-[11px] text-text-tertiary mb-3 leading-relaxed bg-surface-secondary rounded-lg px-3 py-2">
+            成功を先に宣言する。宣言は後から編集できない（言い訳を防ぐため）。
+          </p>
+          <div className="space-y-2">
+            {items.map(i => (
+              <div key={i.id} className="bg-white border border-border-card rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <span className="text-[12px] text-text-primary font-medium flex-1">「{i.content}」</span>
+                  {i.result === 'achieved' && <span className="text-[9px] bg-done-bg text-done rounded px-1.5 py-0.5 font-medium shrink-0">達成</span>}
+                  {i.result === 'failed' && <span className="text-[9px] bg-danger-bg text-danger rounded px-1.5 py-0.5 font-medium shrink-0">未達</span>}
+                </div>
+                <p className="text-[10px] text-text-tertiary mt-1">期限 {i.deadline || '—'}</p>
+                {i.result === 'pending' && (
+                  <div className="flex gap-2 mt-2">
+                    <button onClick={() => setResult(i.id, 'achieved')} className="text-[11px] px-3 py-1 rounded-lg bg-done text-white font-medium">達成した</button>
+                    <button onClick={() => setResult(i.id, 'failed')} className="text-[11px] px-3 py-1 rounded-lg border border-border-card text-text-secondary">未達だった</button>
+                  </div>
+                )}
+                {i.result === 'failed' && <p className="text-[11px] text-primary mt-1.5">→ 失敗リストに登録しましょう</p>}
+              </div>
+            ))}
+          </div>
+          {adding ? (
+            <div className="mt-3 space-y-2 border-t border-border-card pt-3">
+              <Input placeholder="こう成功させる、という宣言" value={f.content} onChange={e => setF({ ...f, content: e.target.value })} />
+              <Input type="date" value={f.deadline} onChange={e => setF({ ...f, deadline: e.target.value })} />
+              <div className="flex gap-2 pt-1">
+                <button onClick={add} className="flex-1 py-2 bg-primary text-white rounded-lg text-[12px] font-medium">宣言する</button>
+                <button onClick={() => setAdding(false)} className="px-4 py-2 border border-border-card rounded-lg text-[12px] text-text-secondary">キャンセル</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAdding(true)} className="flex items-center gap-1 text-[11px] text-primary mt-3 hover:opacity-70"><Plus size={12} />成功を宣言</button>
+          )}
+        </Section>
+      );
+    }
+
+    // ⑤ 撤退ジャッジ ──────────────────────────────────────────────
+    function RetreatJudge() {
+      const phases = [{k:'launch',l:'立ち上げ'},{k:'valley',l:'谷'},{k:'recovery',l:'回復'},{k:'unknown',l:'不明'}];
+      const [target, setTarget] = useState('');
+      const [phase, setPhase] = useState('valley');
+      const [reason, setReason] = useState('');
+      const [affected, setAffected] = useState('');
+      const [decision, setDecision] = useState(null);
+      const [next, setNext] = useState('');
+      const dec = [
+        { k: 'continue', l: '継続', on: 'bg-done text-white border-done' },
+        { k: 'pivot', l: 'ピボット', on: 'bg-primary text-white border-primary' },
+        { k: 'retreat', l: '撤退', on: 'bg-danger text-white border-danger' },
+      ];
+      return (
+        <Section icon={<Ic d={<g><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></g>} />}
+                 title="撤退ジャッジ" sub="Jカーブで続行/撤退を判断">
+          <p className="text-[11px] text-text-tertiary mb-3 leading-relaxed bg-surface-secondary rounded-lg px-3 py-2">
+            Jカーブのどこにいるか、撤退理由を説明できるか、誰に迷惑がかかるか。逆算して判断する。
+          </p>
+          <div className="space-y-3">
+            <div><Label n="①" text="今の取り組み" /><Input placeholder="例：新規チャネルの開拓" value={target} onChange={e => setTarget(e.target.value)} /></div>
+            <div>
+              <Label n="②" text="Jカーブのどこ？" />
+              <Level value={phase} onChange={setPhase} opts={phases.map(p => ({ k: p.k, label: p.l, on: 'bg-primary text-white border-primary font-medium' }))} />
+              {/* Jカーブ図 */}
+              <svg viewBox="0 0 200 60" className="w-full h-12 mt-2">
+                <path d="M5 20 C 40 20, 50 55, 90 55 C 140 55, 160 10, 195 5" fill="none" stroke="#0D9488" strokeWidth="2" />
+                {{launch:[20,22],valley:[90,55],recovery:[150,28],unknown:[100,40]}[phase] &&
+                  <circle cx={{launch:20,valley:90,recovery:150,unknown:100}[phase]} cy={{launch:22,valley:55,recovery:28,unknown:40}[phase]} r="5" fill="#0D9488" />}
+              </svg>
+            </div>
+            <div><Label n="③" text="撤退理由を説明できるか" /><Input placeholder="撤退するなら、その理由" value={reason} onChange={e => setReason(e.target.value)} /></div>
+            <div><Label n="④" text="迷惑をかける相手・範囲" /><Input placeholder="撤退しないことで誰が困るか" value={affected} onChange={e => setAffected(e.target.value)} /></div>
+            <div>
+              <Label n="⑤" text="判断" />
+              <div className="flex gap-1.5">
+                {dec.map(d => (
+                  <button key={d.k} onClick={() => setDecision(d.k)}
+                    className={`flex-1 text-[12px] py-2 rounded-lg border font-medium transition-colors ${decision === d.k ? d.on : 'bg-white border-border-card text-text-secondary'}`}>
+                    {d.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {decision === 'pivot' && (
+              <div><Label n="→" text="次の別解" /><Input placeholder="ピボット先のアクション" value={next} onChange={e => setNext(e.target.value)} /></div>
+            )}
+            {decision && (
+              <div className="bg-surface-secondary rounded-lg px-3 py-2 text-[11px] text-text-secondary">
+                判断ログ: <b className="text-text-primary">{dec.find(d=>d.k===decision).l}</b>
+                {decision === 'pivot' && next && <> → {next}</>}
+              </div>
+            )}
+          </div>
+        </Section>
+      );
+    }
+
+    // ⑥ メタ認知（差分分析） ──────────────────────────────────────
+    function Metacognition() {
+      const [model, setModel] = useState('');
+      const [their, setTheir] = useState('');
+      const [diff, setDiff] = useState('');
+      const [score, setScore] = useState(0);
+      const [stay, setStay] = useState(null);
+      return (
+        <Section icon={<Ic d={<g><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/></g>} />}
+                 title="メタ認知" sub="優れた人との差分を見る">
+          <p className="text-[11px] text-text-tertiary mb-3 leading-relaxed bg-surface-secondary rounded-lg px-3 py-2">
+            人は自分に甘い。周囲の人になったつもりで、自分の意思決定を第三者視点で評価する。
+          </p>
+          <div className="space-y-3">
+            <div><Label n="①" text="比較対象（ロールモデル）" /><Input placeholder="例：尊敬する先輩 A さん" value={model} onChange={e => setModel(e.target.value)} /></div>
+            <div><Label n="②" text="その人ならどう判断したか" /><Input placeholder="第三者の視点で" value={their} onChange={e => setTheir(e.target.value)} /></div>
+            <div><Label n="③" text="自分の判断との差分" /><Input placeholder="何が違ったか" value={diff} onChange={e => setDiff(e.target.value)} /></div>
+            <div>
+              <Label n="④" text="最高の意思決定だったか" />
+              <div className="flex gap-1.5">
+                {[1,2,3,4,5].map(n => (
+                  <button key={n} onClick={() => setScore(n)}
+                    className={`flex-1 py-2 rounded-lg border text-[12px] font-medium transition-colors ${score >= n ? 'bg-primary text-white border-primary' : 'bg-white border-border-card text-text-tertiary'}`}>★</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label n="⑤" text="このフィールドで戦い続ける？" />
+              <div className="flex gap-1.5">
+                {[{k:true,l:'戦い続ける'},{k:false,l:'違うフィールドへ'}].map(o => (
+                  <button key={String(o.k)} onClick={() => setStay(o.k)}
+                    className={`flex-1 py-2 rounded-lg border text-[12px] transition-colors ${stay === o.k ? 'bg-primary text-white border-primary font-medium' : 'bg-white border-border-card text-text-secondary'}`}>{o.l}</button>
+                ))}
+              </div>
+              {stay === false && <p className="text-[11px] text-primary mt-2">→ 差分が大きいなら、勝てるフィールドにピボットする</p>}
+            </div>
+          </div>
+        </Section>
+      );
+    }
+
+    // ── ルート ────────────────────────────────────────────────────
+    function App() {
+      return (
+        <div className="max-w-md mx-auto pb-10">
+          {/* ヘッダー */}
+          <div className="sticky top-0 z-10 bg-surface border-b border-border-card px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-primary"><Spark size={18} /></span>
+              <h1 className="text-base font-semibold text-text-primary">失敗力</h1>
+              <span className="text-[11px] text-text-tertiary">成長力 › 失敗を設計する</span>
+            </div>
+          </div>
+
+          {/* サイクル内の位置づけ */}
+          <div className="mx-4 mt-4 bg-primary-bg rounded-lg px-4 py-3">
+            <p className="text-[11px] text-primary leading-relaxed">
+              失敗と成功は両輪。失敗は「成功のプロトタイプ」。<br />
+              行動の<b>前</b>にリスクを設計し、<b>後</b>に失敗を次の別解へ繋げる。
+            </p>
+            <div className="flex flex-wrap items-center gap-1 mt-2 text-[10px] text-text-secondary">
+              <span>INPUT</span><span className="text-text-tertiary">→</span>
+              <span>OUTPUT</span><span className="text-text-tertiary">→</span>
+              <span>採点</span><span className="text-text-tertiary">→</span>
+              <span>FB</span><span className="text-text-tertiary">→</span>
+              <span>次の打ち手</span><span className="text-text-tertiary">→</span>
+              <span className="bg-primary text-white rounded px-1.5 py-0.5 font-medium">失敗力</span>
+            </div>
+          </div>
+
+          <FailureList />
+          <Premortem />
+          <RiskDesign />
+          <Declaration />
+          <RetreatJudge />
+          <Metacognition />
+
+          <p className="text-center text-[10px] text-text-tertiary mt-6">bekkai 統合デモ — 失敗力</p>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

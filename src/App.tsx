@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Output, RoleModel, UpcomingPerson } from '@/lib/types'
 import { GrowthHome } from '@/components/growth/GrowthHome'
 import { AddOutputModal } from '@/components/growth/AddOutputModal'
@@ -7,19 +7,67 @@ import { AllOutputsModal } from '@/components/growth/AllOutputsModal'
 import { AddRoleModelModal } from '@/components/growth/AddRoleModelModal'
 import { RoleModelDetailModal } from '@/components/growth/RoleModelDetailModal'
 import { QuestionsModal } from '@/components/growth/QuestionsModal'
-import { RequestReviewModal } from '@/components/growth/RequestReviewModal'
+import { FeedbackModal } from '@/components/growth/FeedbackModal'
 import { WeeklyReviewModal } from '@/components/growth/WeeklyReviewModal'
 import { AddInputModal } from '@/components/growth/AddInputModal'
 import { AddUpcomingPersonModal } from '@/components/growth/AddUpcomingPersonModal'
 import { SelfScoreModal } from '@/components/growth/SelfScoreModal'
+import { DiscoveryWrapper } from '@/discovery/DiscoveryWrapper'
+import { BekkaiHome } from '@/components/bekkai/BekkaiHome'
+import { FailurePowerHome } from '@/components/growth/FailurePowerHome'
+import { RealizationPowerHome } from '@/components/growth/RealizationPowerHome'
+import { DataHome } from '@/components/data/DataHome'
+import { AppHeader } from '@/components/AppHeader'
+import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
+import type { GuideFeature } from '@/components/FeatureGuide'
 import { useGrowthStore } from '@/stores/growth-store'
+import { useBekkaiStore } from '@/stores/bekkai-store'
+import { useEntriesStore } from '@/discovery/stores/entries-store'
+
+type AppTab = 'growth' | 'discovery' | 'bekkai' | 'realization' | 'failure' | 'data'
 
 function App() {
   const outputs = useGrowthStore((s) => s.outputs)
   const upcomingPeople = useGrowthStore((s) => s.upcomingPeople)
+  const inputs = useGrowthStore((s) => s.inputs)
+  const roleModels = useGrowthStore((s) => s.roleModels)
+  const failurePower = useGrowthStore((s) => s.failurePower)
+  const realizationPower = useGrowthStore((s) => s.realizationPower)
+  const bekkais = useBekkaiStore((s) => s.bekkais)
+  const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
+
+  // 各機能が「未入力」か（ガイド自動表示の条件）
+  const isFeatureEmpty = (tab: AppTab): boolean => {
+    if (tab === 'growth') return outputs.length === 0 && inputs.length === 0 && roleModels.length === 0 && upcomingPeople.length === 0
+    if (tab === 'bekkai') return bekkais.length === 0
+    if (tab === 'discovery') return Object.values(entries ?? {}).every((v) => !Array.isArray(v) || v.length === 0)
+    if (tab === 'failure') return !failurePower || Object.values(failurePower).every((v) => !Array.isArray(v) || v.length === 0)
+    if (tab === 'realization') return !realizationPower || Object.values(realizationPower).every((v) => !Array.isArray(v) || v.length === 0)
+    return false // data タブにガイドなし
+  }
+
+  const shownThisSession = useRef<Set<AppTab>>(new Set())
+  const shouldAutoShow = (tab: AppTab) =>
+    tab !== 'data' && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
+
+  const [activeTab, setActiveTab] = useState<AppTab>('growth')
+  const [guideOpen, setGuideOpen] = useState(() => {
+    const show = shouldAutoShow('growth')
+    if (show) shownThisSession.current.add('growth')
+    return show
+  })
+
+  const handleTabChange = (tab: AppTab) => {
+    setActiveTab(tab)
+    if (shouldAutoShow(tab)) { shownThisSession.current.add(tab); setGuideOpen(true) }
+  }
+  const closeGuide = () => setGuideOpen(false)
 
   const [addOutputOpen, setAddOutputOpen] = useState(false)
-  const [requestReviewOpen, setRequestReviewOpen] = useState(false)
+  const [linkedInputId, setLinkedInputId] = useState<string | null>(null)
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [feedbackTab, setFeedbackTab] = useState<'request' | 'enter'>('request')
+  const [feedbackOutputId, setFeedbackOutputId] = useState<string | null>(null)
   const [allOutputsOpen, setAllOutputsOpen] = useState(false)
   const [selectedOutput, setSelectedOutput] = useState<Output | null>(null)
   const [addRoleModelOpen, setAddRoleModelOpen] = useState(false)
@@ -34,49 +82,87 @@ function App() {
     ? upcomingPeople.find((p) => p.id === selectedPerson.id) ?? null
     : null
 
+  const handleOutputFromInput = (inputId: string) => {
+    setLinkedInputId(inputId)
+    setAddOutputOpen(true)
+  }
+
+  const handleAddOutputClose = () => {
+    setAddOutputOpen(false)
+    setLinkedInputId(null)
+  }
+
   return (
     <>
-      <GrowthHome
-        onAddOutput={() => setAddOutputOpen(true)}
-        onRequestReview={() => setRequestReviewOpen(true)}
-        onSelfScore={() => setSelfScoreOpen(true)}
-        onSelectOutput={(o) => setSelectedOutput(o)}
-        onSelectRoleModel={(rm) => setSelectedRoleModel(rm)}
-        onAddRoleModel={() => setAddRoleModelOpen(true)}
-        onSelectPerson={(p) => setSelectedPerson(p)}
-        onAddPerson={() => setAddPersonOpen(true)}
-        onAddInput={() => setAddInputOpen(true)}
-        onWeeklyReview={() => setWeeklyReviewOpen(true)}
-      />
+      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={activeTab === 'data' ? undefined : () => setGuideOpen(true)} />
+      {activeTab !== 'data' && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
 
-      <AddOutputModal open={addOutputOpen} onClose={() => setAddOutputOpen(false)} />
-      <RequestReviewModal open={requestReviewOpen} onClose={() => setRequestReviewOpen(false)} />
-      <AllOutputsModal
-        open={allOutputsOpen}
-        onClose={() => setAllOutputsOpen(false)}
-        outputs={outputs}
-        onSelect={(o) => setSelectedOutput(o)}
-      />
-      <OutputDetailModal
-        open={selectedOutput !== null}
-        onClose={() => setSelectedOutput(null)}
-        output={selectedOutput}
-      />
-      <AddRoleModelModal open={addRoleModelOpen} onClose={() => setAddRoleModelOpen(false)} />
-      <RoleModelDetailModal
-        open={selectedRoleModel !== null}
-        onClose={() => setSelectedRoleModel(null)}
-        roleModel={selectedRoleModel}
-      />
-      <QuestionsModal
-        open={freshSelectedPerson !== null}
-        onClose={() => setSelectedPerson(null)}
-        person={freshSelectedPerson}
-      />
-      <WeeklyReviewModal open={weeklyReviewOpen} onClose={() => setWeeklyReviewOpen(false)} />
-      <AddInputModal open={addInputOpen} onClose={() => setAddInputOpen(false)} />
-      <AddUpcomingPersonModal open={addPersonOpen} onClose={() => setAddPersonOpen(false)} />
-      <SelfScoreModal open={selfScoreOpen} onClose={() => setSelfScoreOpen(false)} />
+      {activeTab === 'growth' && (
+        <>
+          <GrowthHome
+            onAddOutput={() => setAddOutputOpen(true)}
+            onRequestReview={(outputId: string) => { setFeedbackOutputId(outputId); setFeedbackTab('request'); setFeedbackOpen(true) }}
+            onSelfScore={() => setSelfScoreOpen(true)}
+            onEnterFeedback={() => { setFeedbackOutputId(null); setFeedbackTab('request'); setFeedbackOpen(true) }}
+            onSelectOutput={(o) => setSelectedOutput(o)}
+            onSelectRoleModel={(rm) => setSelectedRoleModel(rm)}
+            onAddRoleModel={() => setAddRoleModelOpen(true)}
+            onSelectPerson={(p) => setSelectedPerson(p)}
+            onAddPerson={() => setAddPersonOpen(true)}
+            onAddInput={() => setAddInputOpen(true)}
+            onWeeklyReview={() => setWeeklyReviewOpen(true)}
+            onOutputFromInput={handleOutputFromInput}
+          />
+
+          <AddOutputModal
+            open={addOutputOpen}
+            onClose={handleAddOutputClose}
+            initialLinkedInputId={linkedInputId}
+          />
+          <FeedbackModal
+            open={feedbackOpen}
+            initialTab={feedbackTab}
+            initialOutputId={feedbackOutputId ?? undefined}
+            onClose={() => { setFeedbackOpen(false); setFeedbackOutputId(null) }}
+          />
+          <AllOutputsModal
+            open={allOutputsOpen}
+            onClose={() => setAllOutputsOpen(false)}
+            outputs={outputs}
+            onSelect={(o) => setSelectedOutput(o)}
+          />
+          <OutputDetailModal
+            open={selectedOutput !== null}
+            onClose={() => setSelectedOutput(null)}
+            output={selectedOutput}
+          />
+          <AddRoleModelModal open={addRoleModelOpen} onClose={() => setAddRoleModelOpen(false)} />
+          <RoleModelDetailModal
+            open={selectedRoleModel !== null}
+            onClose={() => setSelectedRoleModel(null)}
+            roleModel={selectedRoleModel}
+          />
+          <QuestionsModal
+            open={freshSelectedPerson !== null}
+            onClose={() => setSelectedPerson(null)}
+            person={freshSelectedPerson}
+          />
+          <WeeklyReviewModal open={weeklyReviewOpen} onClose={() => setWeeklyReviewOpen(false)} />
+          <AddInputModal open={addInputOpen} onClose={() => setAddInputOpen(false)} />
+          <AddUpcomingPersonModal open={addPersonOpen} onClose={() => setAddPersonOpen(false)} />
+          <SelfScoreModal open={selfScoreOpen} onClose={() => setSelfScoreOpen(false)} />
+        </>
+      )}
+
+      {activeTab === 'discovery' && <DiscoveryWrapper />}
+
+      {activeTab === 'bekkai' && <BekkaiHome />}
+
+      {activeTab === 'realization' && <RealizationPowerHome />}
+
+      {activeTab === 'failure' && <FailurePowerHome />}
+
+      {activeTab === 'data' && <DataHome />}
     </>
   )
 }
