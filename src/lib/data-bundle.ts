@@ -42,6 +42,7 @@ export function importAll(raw: unknown): { growth: boolean; discovery: boolean; 
       weeklyGoals: Array.isArray(growth.weeklyGoals) ? growth.weeklyGoals : [],
       actionPlans: Array.isArray(growth.actionPlans) ? growth.actionPlans : [],
       failurePower: growth.failurePower && typeof growth.failurePower === 'object' ? growth.failurePower : undefined,
+      realizationPower: growth.realizationPower && typeof growth.realizationPower === 'object' ? growth.realizationPower : undefined,
     })
     result.growth = true
   }

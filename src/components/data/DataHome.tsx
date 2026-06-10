@@ -74,7 +74,7 @@ export function DataHome() {
           <h2 className="text-sm font-medium">バックアップ・復元</h2>
         </div>
         <p className="text-[11px] text-text-secondary leading-relaxed mb-3">
-          成長力・発見力・別解力のすべてのデータを、1つのJSONファイルにまとめて保存／復元します。機種変更や別端末への移行に使えます。
+          成長力・発見力・別解力・実現力・失敗力のすべてのデータを、1つのJSONファイルにまとめて保存／復元します。機種変更や別端末・公開URLへの移行に使えます。
         </p>
 
         {status === 'exported' && <Banner ok>全データをバックアップしました</Banner>}
