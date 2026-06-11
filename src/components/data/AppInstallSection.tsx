@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Smartphone, Bell, Check } from 'lucide-react'
+import { Smartphone, Bell, Check, Share2 } from 'lucide-react'
 import { notifySupported, notifyPermission, requestNotify, showLocalNotification, isStandalone } from '@/lib/notify'
+import { shareApp } from '@/lib/share'
 
 export function AppInstallSection() {
   const [perm, setPerm] = useState<NotificationPermission>(notifyPermission())
@@ -41,6 +42,14 @@ export function AppInstallSection() {
       {perm === 'denied' && notifySupported() && (
         <p className="text-[10px] text-text-tertiary mt-1.5">ブラウザの設定で通知がブロックされています。設定から許可してください。</p>
       )}
+
+      <button
+        onClick={shareApp}
+        className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm text-white font-medium mt-2"
+        style={{ background: 'linear-gradient(135deg,#185FA5,#7c6cff)' }}
+      >
+        <Share2 size={14} />友だちにすすめる
+      </button>
     </section>
   )
 }

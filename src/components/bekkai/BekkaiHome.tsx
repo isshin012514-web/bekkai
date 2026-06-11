@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Plus, ChevronLeft, Trash2, Star, Search } from 'lucide-react'
+import { Plus, ChevronLeft, Trash2, Star, Search, Share2 } from 'lucide-react'
 import type { BekkaiAxis } from '@/lib/types'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
@@ -7,6 +7,7 @@ import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
 import { Term } from '@/components/Term'
 import { toast } from '@/stores/toast-store'
+import { shareBekkai } from '@/lib/share'
 import { BekkaiVenn } from './BekkaiVenn'
 import { HintTicker } from './HintTicker'
 import { AreaSheet } from './AreaSheet'
@@ -229,6 +230,13 @@ export function BekkaiHome() {
         style={{ background: 'linear-gradient(135deg,#DC2626,#F97316)', boxShadow: '0 4px 16px rgba(220,38,38,0.2)' }}>
         統合して別解を導く
       </button>
+
+      {active.conclusion?.trim() && (
+        <button onClick={() => shareBekkai(active.theme, active.conclusion)}
+          className="mx-4 mt-2 w-[calc(100%-32px)] inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border-card text-[13px] text-text-secondary hover:bg-surface-secondary transition-colors">
+          <Share2 size={14} />この別解をシェア
+        </button>
+      )}
 
       {/* Sheets */}
       <AreaSheet

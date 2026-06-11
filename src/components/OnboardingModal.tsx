@@ -77,8 +77,8 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <p className="text-[12px] text-text-secondary leading-relaxed mb-4">
-            bekkai は「答えのない問いに、<b>自分なりの答え（別解）</b>を出し、それを<b>実現する</b>」ためのアプリ。
-            5つの力が1本の流れでつながっています。
+            <b>自己分析で終わらせない。</b>bekkai は「答えのない問いに、<b>自分だけの答え（別解）</b>を出し、<b>実現する</b>」ためのアプリ。
+            就活・キャリア・事業づくりを、5つの力が1本の流れで前に進めます。
           </p>
 
           {/* 流れの帯 */}
