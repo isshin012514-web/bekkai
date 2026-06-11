@@ -1,4 +1,4 @@
-import { Sparkles, User, Eye } from 'lucide-react'
+import { FlaskConical, User, Eye } from 'lucide-react'
 import { useSampleView } from '@/stores/sample-view-store'
 import type { SampleFeature } from '@/lib/samples'
 
@@ -36,7 +36,7 @@ export function SampleControls({ feature, accent }: SampleControlsProps) {
             className={base}
             style={sample ? { background: accent, color: '#fff' } : { color: 'var(--color-text-secondary)' }}
           >
-            <Sparkles size={12} />サンプル
+            <FlaskConical size={12} />サンプル
           </button>
         </div>
       </div>
