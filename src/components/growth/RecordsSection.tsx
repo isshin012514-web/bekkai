@@ -338,8 +338,8 @@ export function RecordsSection({ inputs, outputs, onSelectOutput, onOutputFromIn
                     <div className="flex items-center gap-1">
                       <button onClick={() => toggleExpand(itemId)}
                         className="flex-1 flex items-center gap-2.5 py-2 px-2 rounded-lg hover:bg-surface-secondary transition-colors text-left">
-                        <div className="w-7 h-7 rounded-full bg-waiting-bg flex items-center justify-center shrink-0">
-                          <Icon size={13} className="text-waiting" />
+                        <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center shrink-0">
+                          <Icon size={13} className="text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm truncate">{output.title}</p>

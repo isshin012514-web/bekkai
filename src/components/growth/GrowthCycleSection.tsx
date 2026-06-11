@@ -2,9 +2,9 @@ import { ChevronRight, RotateCcw } from 'lucide-react'
 
 const STEPS = [
   { label: 'INPUT',  sub: '３割', bg: 'bg-sky-100',    text: 'text-sky-700',    border: 'border-sky-300' },
-  { label: 'OUTPUT', sub: '７割', bg: 'bg-orange-400',  text: 'text-white',      border: 'border-orange-400' },
+  { label: 'OUTPUT', sub: '７割', bg: 'bg-primary',     text: 'text-white',      border: 'border-primary' },
   { label: '採点',   sub: null,   bg: 'bg-emerald-500', text: 'text-white',      border: 'border-emerald-500' },
-  { label: '次の打手', sub: null, bg: 'bg-primary',    text: 'text-white',      border: 'border-primary' },
+  { label: '次の打手', sub: null, bg: 'bg-slate-700',   text: 'text-white',      border: 'border-slate-700' },
 ]
 
 export function GrowthCycleSection() {

@@ -1,12 +1,16 @@
 import { useMemo, useState } from 'react'
-import { Plus, ChevronLeft, Trash2, Star, Search, Share2 } from 'lucide-react'
+import { Plus, ChevronLeft, Trash2, Star, Search, Share2, Rocket } from 'lucide-react'
 import type { BekkaiAxis } from '@/lib/types'
 import { useBekkaiStore } from '@/stores/bekkai-store'
+import { useGrowthStore } from '@/stores/growth-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
+import { generateId, nowISO } from '@/lib/utils'
+import type { AppTab } from '@/components/AppHeader'
 import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
 import { Term } from '@/components/Term'
 import { toast } from '@/stores/toast-store'
+import { celebrate } from '@/stores/celebrate-store'
 import { shareBekkai } from '@/lib/share'
 import { BekkaiVenn } from './BekkaiVenn'
 import { HintTicker } from './HintTicker'
@@ -17,11 +21,22 @@ const AXIS_BY_IDX: BekkaiAxis[] = ['self', 'excellent', 'different']
 const COLORS = ['#6366f1', '#D97706', '#059669']
 const BGS = ['#EEF2FF', '#FFFBEB', '#ECFDF5']
 
-export function BekkaiHome() {
+export function BekkaiHome({ onNavigate }: { onNavigate?: (tab: AppTab) => void }) {
   const bekkais = useBekkaiStore((s) => s.bekkais)
   const addBekkai = useBekkaiStore((s) => s.addBekkai)
   const updateBekkai = useBekkaiStore((s) => s.updateBekkai)
   const deleteBekkai = useBekkaiStore((s) => s.deleteBekkai)
+  const realizationPower = useGrowthStore((s) => s.realizationPower)
+  const setRealizationPower = useGrowthStore((s) => s.setRealizationPower)
+
+  // 別解 → 実現力 へ移行：結論を「実現したい別解」として組み合わせを新規作成し実現力へ
+  const sendToRealization = (theme: string, conclusion: string) => {
+    const bekkaiText = (conclusion.trim() || theme.trim() || '無題の別解')
+    const combo = { id: generateId(), bekkai: bekkaiText, elements: [], status: 'trying' as const, adjustType: null, adjustNote: '', created_at: nowISO() }
+    setRealizationPower({ ...realizationPower, combinations: [combo, ...realizationPower.combinations] })
+    toast('実現力に移しました')
+    onNavigate?.('realization')
+  }
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [editingAxis, setEditingAxis] = useState<BekkaiAxis | null>(null)
@@ -232,10 +247,17 @@ export function BekkaiHome() {
       </button>
 
       {active.conclusion?.trim() && (
-        <button onClick={() => shareBekkai(active.theme, active.conclusion)}
-          className="mx-4 mt-2 w-[calc(100%-32px)] inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border-card text-[13px] text-text-secondary hover:bg-surface-secondary transition-colors">
-          <Share2 size={14} />この別解をシェア
-        </button>
+        <div className="mx-4 mt-2 flex gap-2">
+          <button onClick={() => sendToRealization(active.theme, active.conclusion)}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] text-white font-medium"
+            style={{ background: 'linear-gradient(135deg,#EA580C,#F59E0B)' }}>
+            <Rocket size={14} />実現力で形にする
+          </button>
+          <button onClick={() => shareBekkai(active.theme, active.conclusion)}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-border-card text-[13px] text-text-secondary hover:bg-surface-secondary transition-colors">
+            <Share2 size={14} />シェア
+          </button>
+        </div>
       )}
 
       {/* Sheets */}
@@ -253,7 +275,7 @@ export function BekkaiHome() {
         onClose={() => setIntegrateOpen(false)}
         onEditAxis={(ax) => { setIntegrateOpen(false); setTimeout(() => setEditingAxis(ax), 250) }}
         onChangeConclusion={(t) => updateBekkai(active.id, { conclusion: t })}
-        onConfirm={() => { setIntegrateOpen(false); if (active.conclusion?.trim()) toast('✨ 別解がまとまりました') }}
+        onConfirm={() => { setIntegrateOpen(false); if (active.conclusion?.trim()) { toast('✨ 別解がまとまりました'); celebrate() } }}
       />
     </div>
   )

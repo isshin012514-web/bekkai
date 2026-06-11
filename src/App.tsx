@@ -27,6 +27,7 @@ import type { GuideFeature } from '@/components/FeatureGuide'
 import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
 import { Toaster } from '@/components/Toaster'
 import { QuickCapture } from '@/components/QuickCapture'
+import { Celebration } from '@/components/Celebration'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
@@ -164,7 +165,7 @@ function App() {
 
       {activeTab === 'discovery' && <DiscoveryWrapper />}
 
-      {activeTab === 'bekkai' && <BekkaiHome />}
+      {activeTab === 'bekkai' && <BekkaiHome onNavigate={handleTabChange} />}
 
       {activeTab === 'realization' && <RealizationPowerHome />}
 
@@ -177,6 +178,7 @@ function App() {
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
       {!['data', 'about'].includes(activeTab) && <QuickCapture />}
+      <Celebration />
       <Toaster />
     </>
   )

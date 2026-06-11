@@ -4,6 +4,7 @@ import {
   ChevronDown, ChevronUp, Handshake, Sparkles,
 } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
+import { useBekkaiStore } from '@/stores/bekkai-store'
 import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
 import { Term } from '@/components/Term'
@@ -100,6 +101,13 @@ function CombinationSub({ rp, save }: { rp: RealizationPower; save: (next: Parti
   const empty = { bekkai: '', elementsText: '', status: 'trying' as CombineStatus, adjustType: null as AdjustType | null, adjustNote: '' }
   const [f, setF] = useState(empty)
   const [adding, setAdding] = useState(false)
+  // 別解力からワンタップ引用（結論があるものを優先）
+  const bekkais = useBekkaiStore((s) => s.bekkais)
+  const bekkaiSuggestions = bekkais
+    .map((b) => (b.conclusion?.trim() || b.theme?.trim() || ''))
+    .filter(Boolean)
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .slice(0, 5)
 
   const add = () => {
     if (!f.bekkai.trim()) return
@@ -157,7 +165,21 @@ function CombinationSub({ rp, save }: { rp: RealizationPower; save: (next: Parti
       </div>
       {adding ? (
         <div className="mt-3 space-y-2.5 border-t border-border-card pt-3">
-          <div><FieldLabel n="①" text="実現したい別解" /><input className={inputCls} placeholder="例：訪問営業 × データ分析で先回り提案" value={f.bekkai} onChange={(e) => setF({ ...f, bekkai: e.target.value })} /></div>
+          <div>
+            <FieldLabel n="①" text="実現したい別解" />
+            <input className={inputCls} placeholder="例：訪問営業 × データ分析で先回り提案" value={f.bekkai} onChange={(e) => setF({ ...f, bekkai: e.target.value })} />
+            {!f.bekkai.trim() && bekkaiSuggestions.length > 0 && (
+              <div className="mt-1.5">
+                <p className="text-[10px] text-text-tertiary mb-1 flex items-center gap-1"><Sparkles size={10} className="text-[#DC2626]" />別解力から引用</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {bekkaiSuggestions.map((s, i) => (
+                    <button key={i} onClick={() => setF({ ...f, bekkai: s })}
+                      className="text-[11px] px-2.5 py-1 rounded-full border border-[#DC262655] text-[#DC2626] hover:bg-[#DC262614] transition-colors max-w-full truncate">{s}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
           <div><FieldLabel n="②" text="組み合わせる・連鎖させる要素" hint="（、や改行で区切る）" /><textarea className={inputCls} rows={2} placeholder="足で稼ぐ訪問、得意先データ、同業の成功事例" value={f.elementsText} onChange={(e) => setF({ ...f, elementsText: e.target.value })} /></div>
           <div>
             <FieldLabel n="③" text="修正のコツ" hint="（自分らしさは残す）" />
