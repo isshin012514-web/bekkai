@@ -6,6 +6,7 @@ import {
 import { useGrowthStore } from '@/stores/growth-store'
 import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
+import { Term } from '@/components/Term'
 import { toast } from '@/stores/toast-store'
 import { generateId, nowISO } from '@/lib/utils'
 import { emptyFailurePower, RISK_LEVEL_LABELS, J_CURVE_LABELS, RETREAT_DECISION_LABELS } from '@/lib/types'
@@ -443,7 +444,7 @@ export function FailurePowerHome() {
         {/* ⑤ 撤退ジャッジ */}
         <CrudSection<RetreatJudgment, FRetreat>
           icon={<CornerUpLeft size={14} />} title="撤退ジャッジ" sub="Jカーブで続行/撤退を判断"
-          note="Jカーブのどこにいるか、撤退理由を説明できるか、誰に迷惑がかかるか。逆算して判断する。"
+          note={<><Term def="投資しても一度後退し、ある点から急に正へ転じる成長曲線。今が「谷」か「回復」かで判断が変わる。">Jカーブ</Term>のどこにいるか、撤退理由を説明できるか、誰に迷惑がかかるか。逆算して判断する。</>}
           items={fp.retreatJudgments} onChange={(next) => save({ retreatJudgments: next })}
           addLabel="判断を追加" saveLabel="記録する"
           blank={{ target: '', jCurvePhase: 'valley', retreatReason: '', affectedParties: '', decision: null, nextAlternative: '' }}
@@ -512,7 +513,7 @@ export function FailurePowerHome() {
         {/* ⑥ メタ認知 */}
         <CrudSection<Metacognition, FMeta>
           icon={<Target size={14} />} title="メタ認知" sub="優れた人との差分を見る"
-          note="人は自分に甘い。周囲の人になったつもりで、自分の意思決定を第三者視点で評価する。"
+          note={<><Term def="自分の思考や判断を一段上から客観的に眺めること。人は自分に甘いので、第三者の視点で見直すと盲点に気づける。">メタ認知</Term>＝人は自分に甘い。周囲の優れた人になったつもりで、自分の意思決定を第三者視点で評価する。</>}
           items={fp.metacognitions} onChange={(next) => save({ metacognitions: next })}
           addLabel="振り返りを追加" saveLabel="記録する"
           blank={{ roleModel: '', theirJudgment: '', diff: '', decisionScore: 0, stayInField: null }}

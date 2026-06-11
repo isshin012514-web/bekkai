@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Plus, ChevronLeft, Trash2, Star } from 'lucide-react'
+import { Plus, ChevronLeft, Trash2, Star, Search } from 'lucide-react'
 import type { BekkaiAxis } from '@/lib/types'
 import { useBekkaiStore } from '@/stores/bekkai-store'
+import { useEntriesStore } from '@/discovery/stores/entries-store'
 import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
+import { Term } from '@/components/Term'
 import { BekkaiVenn } from './BekkaiVenn'
 import { HintTicker } from './HintTicker'
 import { AreaSheet } from './AreaSheet'
@@ -25,6 +27,22 @@ export function BekkaiHome() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   const active = useMemo(() => bekkais.find((b) => b.id === activeId) ?? null, [bekkais, activeId])
+
+  // 発見力の気づき → 別解テーマへワンタップ引用（問題・未来・目標・自分を優先）
+  const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
+  const discoverySuggestions = useMemo(() => {
+    const pick: string[] = []
+    for (const mod of ['problem', 'future', 'goal', 'self']) {
+      for (const [k, list] of Object.entries(entries ?? {})) {
+        if (!k.startsWith(mod + '-') || !Array.isArray(list)) continue
+        for (const e of list) {
+          const t = typeof e === 'string' ? e : ((e as { text?: string; name?: string; label?: string })?.text ?? (e as { name?: string })?.name ?? (e as { label?: string })?.label)
+          if (t && t.trim()) pick.push(t.trim())
+        }
+      }
+    }
+    return [...new Set(pick)].slice(0, 6)
+  }, [entries])
 
   const handleNew = () => {
     const id = addBekkai('')
@@ -132,9 +150,37 @@ export function BekkaiHome() {
         </button>
       </div>
 
+      {/* 発見力からワンタップ引用（テーマ未入力時） */}
+      {!active.theme.trim() && discoverySuggestions.length > 0 && (
+        <div className="px-4 pt-2.5">
+          <p className="text-[10px] text-text-tertiary mb-1.5 flex items-center gap-1">
+            <Search size={11} className="text-[#7c6cff]" />発見力の気づきから引用
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {discoverySuggestions.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => updateBekkai(active.id, { theme: s })}
+                className="text-[11px] px-2.5 py-1 rounded-full border border-[#7c6cff55] text-[#7c6cff] hover:bg-[#7c6cff14] transition-colors max-w-full truncate"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Venn */}
       <div className="py-2 px-4" style={{ background: 'linear-gradient(180deg,var(--color-surface) 0%,var(--color-surface-secondary) 100%)' }}>
         <BekkaiVenn scores={scores} ideaCounts={ideaCounts} onSelectAxis={(i) => setEditingAxis(AXIS_BY_IDX[i])} onOpenIntegrate={() => allSet && setIntegrateOpen(true)} />
+        <div className="flex items-center justify-center flex-wrap gap-x-2 gap-y-0.5 text-[9px] text-text-tertiary mt-0.5">
+          <span>重なりの意味:</span>
+          <Term def="自分らしさに偏りすぎて、独善的・自己満足になる状態。">独りよがり</Term>
+          <span>/</span>
+          <Term def="優等生的で他と差がなく、埋もれてしまう状態（コモディティ化）。">コモディティ</Term>
+          <span>/</span>
+          <Term def="奇抜・斬新だが支持されず、続けられない状態。">長続きしない</Term>
+        </div>
       </div>
 
       <div className="mt-2"><HintTicker /></div>

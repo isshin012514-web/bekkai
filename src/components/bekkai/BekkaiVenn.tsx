@@ -101,38 +101,29 @@ export function BekkaiVenn({ scores, ideaCounts, onSelectAxis, onOpenIntegrate }
           style={{ transition: 'r 0.5s cubic-bezier(0.23,1,0.32,1)' }} />
       )}
 
-      {/* Circle names + score — follow circle outward so they stay inside */}
+      {/* Circle names + score — 半径に追従しつつ、ブロック全体が円内に収まる位置へ */}
       {[0, 1, 2].map((i) => {
         const dir = outwardDir(i)
         const c = CENTERS[i]
-        const nx = c.cx + dir.x * rs[i] * 0.5
-        const ny = c.cy + dir.y * rs[i] * 0.5
+        // ラベルブロック（名前2行＋スコア1行 ≈ 上下22px）が円からはみ出さないよう、
+        // 外向きオフセットを「半径 − ブロック余白」でクランプする
+        const block = 24
+        const off = Math.max(0, Math.min(rs[i] * 0.42, rs[i] - block - 14))
+        const nx = c.cx + dir.x * off
+        const ny = c.cy + dir.y * off
         return (
           <g key={i} pointerEvents="none">
-            <text x={nx} y={ny - 4} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="600">{NAMES[i][0]}</text>
-            <text x={nx} y={ny + 10} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="600">{NAMES[i][1]}</text>
+            <text x={nx} y={ny - 9} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="600">{NAMES[i][0]}</text>
+            <text x={nx} y={ny + 5} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="600">{NAMES[i][1]}</text>
             {scores[i] > 0 ? (
-              <>
-                <text x={nx} y={ny + 34} textAnchor="middle" fill={COLORS[i]} fontSize="22" fontWeight="800" opacity="0.45">{scores[i]}</text>
-                <text x={nx} y={ny + 48} textAnchor="middle" fill={COLORS[i]} fontSize="9" opacity="0.45">{BEKKAI_SCORE_LABELS[scores[i]]}</text>
-              </>
+              <text x={nx} y={ny + 22} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="700" opacity="0.5">
+                {scores[i]} {BEKKAI_SCORE_LABELS[scores[i]]}{ideaCounts[i] > 0 ? ` ・案${ideaCounts[i]}` : ''}
+              </text>
+            ) : ideaCounts[i] > 0 ? (
+              <text x={nx} y={ny + 21} textAnchor="middle" fill={COLORS[i]} fontSize="9" fontWeight="600" opacity="0.7">案{ideaCounts[i]}件</text>
             ) : (
-              <text x={nx} y={ny + 26} textAnchor="middle" fill={COLORS[i]} fontSize="9" fontWeight="600" opacity="0.7">タップして評価</text>
+              <text x={nx} y={ny + 21} textAnchor="middle" fill={COLORS[i]} fontSize="9" fontWeight="600" opacity="0.7">タップして評価</text>
             )}
-          </g>
-        )
-      })}
-
-      {/* Idea count badges — near each circle's outer tip */}
-      {[0, 1, 2].map((i) => {
-        if (ideaCounts[i] <= 0) return null
-        const dir = outwardDir(i)
-        const bx = CENTERS[i].cx + dir.x * (rs[i] - 6)
-        const by = CENTERS[i].cy + dir.y * (rs[i] - 6)
-        return (
-          <g key={i} pointerEvents="none">
-            <rect x={bx - 15} y={by - 8} width="30" height="16" rx="8" fill={COLORS[i]} />
-            <text x={bx} y={by + 4} textAnchor="middle" fill="white" fontSize="9" fontWeight="700">{ideaCounts[i]}件</text>
           </g>
         )
       })}

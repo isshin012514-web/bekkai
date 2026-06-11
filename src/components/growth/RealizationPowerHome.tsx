@@ -390,8 +390,8 @@ function TeamSub({ rp, save }: { rp: RealizationPower; save: (next: Partial<Real
           </div>
           <input className={inputCls} placeholder={f.type === 'member' ? '名前' : '資産名（友人・顧客など）'} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
           <input className={inputCls} placeholder={f.type === 'member' ? '役割' : '関係・活かし方'} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })} />
-          <div><p className="text-[10px] text-text-tertiary mb-1">信用（成果で上がる）</p><Stars value={f.shinyo} onChange={(n) => setF({ ...f, shinyo: n })} /></div>
-          <div><p className="text-[10px] text-text-tertiary mb-1">信頼（人柄）</p><Stars value={f.shinrai} onChange={(n) => setF({ ...f, shinrai: n })} /></div>
+          <div><p className="text-[10px] text-text-tertiary mb-1"><Term def="その人が「成果を出せる」と見込まれる度合い。実績を上げると飛躍的に高まる。">信用</Term>（成果で上がる）</p><Stars value={f.shinyo} onChange={(n) => setF({ ...f, shinyo: n })} /></div>
+          <div><p className="text-[10px] text-text-tertiary mb-1"><Term def="人柄や誠実さへの信頼。成果とは別に、日々の振る舞いで積み上がる。">信頼</Term>（人柄）</p><Stars value={f.shinrai} onChange={(n) => setF({ ...f, shinrai: n })} /></div>
           <SaveCancel onSave={add} onCancel={() => setAdding(false)} />
         </div>
       ) : (
