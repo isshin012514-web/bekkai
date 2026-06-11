@@ -20,6 +20,7 @@ import { DataHome } from '@/components/data/DataHome'
 import { AppHeader } from '@/components/AppHeader'
 import type { AppTab } from '@/components/AppHeader'
 import { BottomNav } from '@/components/BottomNav'
+import { HomeScreen } from '@/components/HomeScreen'
 import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
 import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
@@ -47,18 +48,14 @@ function App() {
     return false // data タブにガイドなし
   }
 
+  const NON_GUIDE: AppTab[] = ['home', 'dashboard', 'data']
   const shownThisSession = useRef<Set<AppTab>>(new Set())
   const shouldAutoShow = (tab: AppTab) =>
-    tab !== 'data' && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
+    !NON_GUIDE.includes(tab) && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
 
-  const [activeTab, setActiveTab] = useState<AppTab>('growth')
+  const [activeTab, setActiveTab] = useState<AppTab>('home')
   const [onboardingOpen, setOnboardingOpen] = useState(() => !isOnboarded())
-  const [guideOpen, setGuideOpen] = useState(() => {
-    // 初回オンボーディング中は機能ガイドを重ねない
-    const show = isOnboarded() && shouldAutoShow('growth')
-    if (show) shownThisSession.current.add('growth')
-    return show
-  })
+  const [guideOpen, setGuideOpen] = useState(false)
 
   const handleTabChange = (tab: AppTab) => {
     setActiveTab(tab)
@@ -96,11 +93,13 @@ function App() {
 
   return (
     <>
-      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={activeTab === 'data' || activeTab === 'dashboard' ? () => setOnboardingOpen(true) : () => setGuideOpen(true)} />
-      {activeTab !== 'data' && activeTab !== 'dashboard' && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
+      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={NON_GUIDE.includes(activeTab) ? () => setOnboardingOpen(true) : () => setGuideOpen(true)} />
+      {!NON_GUIDE.includes(activeTab) && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
       <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
 
-      <main className="pb-24">
+      <main className="pb-28">
+      {activeTab === 'home' && <HomeScreen onNavigate={handleTabChange} />}
+
       {activeTab === 'growth' && (
         <>
           <GrowthHome
