@@ -3,7 +3,7 @@ import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, signOut, onAuthStateChanged, type Auth, type User,
 } from 'firebase/auth'
-import { getFirestore, type Firestore } from 'firebase/firestore'
+import { initializeFirestore, type Firestore } from 'firebase/firestore'
 
 const cfg = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -26,7 +26,13 @@ function ensure() {
   if (!app) {
     app = initializeApp(cfg as Required<typeof cfg>)
     authInstance = getAuth(app)
-    dbInstance = getFirestore(app)
+    // 制限の強いネットワーク(プロキシ/一部モバイル/サンドボックス)では
+    // WebChannel ストリーミングが繋がらず固まることがあるため long-polling 自動検出を有効化。
+    // ignoreUndefinedProperties で undefined フィールドの書き込みエラーも防止。
+    dbInstance = initializeFirestore(app, {
+      experimentalAutoDetectLongPolling: true,
+      ignoreUndefinedProperties: true,
+    })
   }
   return { auth: authInstance as Auth, db: dbInstance as Firestore }
 }

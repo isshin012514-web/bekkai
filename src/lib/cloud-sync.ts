@@ -38,9 +38,10 @@ export function localHasData(): boolean {
   return Boolean(growthHas || discoveryHas || bekkaiHas)
 }
 
-/** ローカル全データをクラウドへ保存 */
+/** ローカル全データをクラウドへ保存。
+ * Firestore は undefined を許可しないため、JSON ラウンドトリップで除去してから書き込む。 */
 export async function pushBundle(uid: string): Promise<number> {
-  const bundle = exportAll(new Date().toISOString())
+  const bundle = JSON.parse(JSON.stringify(exportAll(new Date().toISOString())))
   const ms = Date.now()
   await setDoc(userDoc(uid), { bundle, updatedAtMs: ms }, { merge: true })
   setLastSync(ms)
