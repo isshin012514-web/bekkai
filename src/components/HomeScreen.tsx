@@ -161,6 +161,10 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           <span className="px-2 py-0.5 rounded-full font-medium" style={{ background: '#0D94881A', color: '#0D9488' }}>失敗で立て直す</span>
         </div>
       </div>
+
+      <button onClick={() => onNavigate('about')} className="mx-auto mt-4 block text-[11px] text-text-tertiary underline underline-offset-2">
+        bekkai とは？
+      </button>
     </div>
   )
 }

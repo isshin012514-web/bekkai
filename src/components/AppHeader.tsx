@@ -1,7 +1,7 @@
 import { Sun, Moon, Monitor, HelpCircle, Database, LineChart } from 'lucide-react'
 import { useTheme } from '@/lib/use-theme'
 
-export type AppTab = 'home' | 'growth' | 'discovery' | 'bekkai' | 'realization' | 'failure' | 'dashboard' | 'data'
+export type AppTab = 'home' | 'growth' | 'discovery' | 'bekkai' | 'realization' | 'failure' | 'dashboard' | 'data' | 'about'
 
 interface AppHeaderProps {
   activeTab: AppTab

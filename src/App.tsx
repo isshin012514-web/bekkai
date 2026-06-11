@@ -21,6 +21,7 @@ import { AppHeader } from '@/components/AppHeader'
 import type { AppTab } from '@/components/AppHeader'
 import { BottomNav } from '@/components/BottomNav'
 import { HomeScreen } from '@/components/HomeScreen'
+import { AboutScreen } from '@/components/AboutScreen'
 import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
 import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
@@ -50,7 +51,7 @@ function App() {
     return false // data タブにガイドなし
   }
 
-  const NON_GUIDE: AppTab[] = ['home', 'dashboard', 'data']
+  const NON_GUIDE: AppTab[] = ['home', 'dashboard', 'data', 'about']
   const shownThisSession = useRef<Set<AppTab>>(new Set())
   // 全体オンボーディングを見た後は各機能ガイドを自動表示しない（モーダル疲れ防止）。
   // 使い方はヘッダーの「？」からいつでも開ける。
@@ -103,6 +104,8 @@ function App() {
 
       <main className="pb-28">
       {activeTab === 'home' && <HomeScreen onNavigate={handleTabChange} />}
+
+      {activeTab === 'about' && <AboutScreen onStart={() => handleTabChange('home')} onBack={() => handleTabChange('home')} />}
 
       {activeTab === 'growth' && (
         <>
@@ -173,7 +176,7 @@ function App() {
       </main>
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-      {activeTab !== 'data' && <QuickCapture />}
+      {!['data', 'about'].includes(activeTab) && <QuickCapture />}
       <Toaster />
     </>
   )

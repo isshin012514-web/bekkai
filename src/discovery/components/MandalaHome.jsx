@@ -3,6 +3,7 @@ import Icon from './Icon'
 import { useData } from '../DataContext'
 import { useEntriesStore } from '../stores/entries-store'
 import { SampleControls } from '@/components/SampleControls'
+import { share } from '@/lib/share'
 
 const GRID_ORDER = [
   { pos: 0, idx: 0 },
@@ -68,6 +69,21 @@ export default function MandalaHome({ onNavigate }) {
   const totalFilled = allStats.reduce((s, x) => s + x.filled, 0)
   const totalEntries = allStats.reduce((s, x) => s + x.count, 0)
 
+  const shareResult = () => {
+    const pct = totalCells > 0 ? Math.round((totalFilled / totalCells) * 100) : 0
+    const get = (key) => {
+      const list = storeEntries[key]
+      if (Array.isArray(list) && list.length) { const e = list[0]; return typeof e === 'string' ? e : (e?.text || e?.name || '') }
+      return ''
+    }
+    const strength = get('self-strength')
+    const problem = get('problem-gap') || get('problem-blocker') || get('problem-root')
+    const lines = [`【自己分析マンダラ】8つの視点を${pct}%深掘り（${totalEntries}件）`]
+    if (strength) lines.push(`強み: ${strength}`)
+    if (problem) lines.push(`解くべき問題: ${problem}`)
+    share({ title: 'bekkai', text: lines.join('\n') + '\n\n― 自己分析アプリ bekkai で作成' })
+  }
+
   return (
     <div className="py-5 space-y-5">
       <div className="-mx-1">
@@ -130,6 +146,15 @@ export default function MandalaHome({ onNavigate }) {
           <Icon name="filter" size={12} />横断レビュー
         </button>
       </div>
+
+      {totalEntries > 0 && (
+        <button
+          onClick={shareResult}
+          className="animate-fade w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border text-[12px] text-text-dim hover:text-text hover:border-border-light transition-all"
+        >
+          <Icon name="upload" size={13} />自己分析の結果をシェア
+        </button>
+      )}
 
       <div className="grid grid-cols-3 gap-2.5 aspect-square">
         {GRID_ORDER.map(({ pos, idx }) => {
