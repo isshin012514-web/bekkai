@@ -5,6 +5,8 @@ import {
 } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
 import { SampleControls } from '@/components/SampleControls'
+import { SampleHint } from '@/components/SampleHint'
+import { toast } from '@/stores/toast-store'
 import { generateId, nowISO } from '@/lib/utils'
 import { emptyFailurePower, RISK_LEVEL_LABELS, J_CURVE_LABELS, RETREAT_DECISION_LABELS } from '@/lib/types'
 import type {
@@ -147,7 +149,7 @@ function CrudSection<T extends { id: string; created_at: string }, F>(cfg: CrudC
   const startAdd = () => { setForm(cfg.blank); setEditingId(null); setExpandedId(null); setAdding(true) }
   const startEdit = (item: T) => { setForm(cfg.toForm(item)); setAdding(false); setEditingId(item.id) }
   const cancel = () => { setAdding(false); setEditingId(null); setForm(cfg.blank) }
-  const saveNew = () => { if (!cfg.valid(form)) return; onChange([cfg.build(form, null), ...items]); cancel() }
+  const saveNew = () => { if (!cfg.valid(form)) return; onChange([cfg.build(form, null), ...items]); toast('追加しました'); cancel() }
   const saveEdit = (item: T) => { if (!cfg.valid(form)) return; onChange(items.map((i) => (i.id === item.id ? cfg.build(form, item) : i))); cancel() }
   const remove = (id: string) => { onChange(items.filter((i) => i.id !== id)); if (expandedId === id) setExpandedId(null) }
   const update = (id: string, patch: Partial<T>) => onChange(items.map((i) => (i.id === id ? { ...i, ...patch } : i)))
@@ -257,10 +259,12 @@ export function FailurePowerHome() {
   const setFailurePower = useGrowthStore((s) => s.setFailurePower)
   const fp = failurePower
   const save = (next: Partial<FailurePower>) => setFailurePower({ ...fp, ...next })
+  const isEmpty = Object.values(fp).every((v) => !Array.isArray(v) || v.length === 0)
 
   return (
     <div className="pb-6">
       <SampleControls feature="failure" accent="#0D9488" />
+      {isEmpty && <div className="mt-3 flex justify-center"><SampleHint feature="failure" accent="#0D9488" /></div>}
       {/* イントロ + 成長サイクル内の位置づけ */}
       <div className="mx-4 mt-4 bg-fail-bg rounded-lg px-4 py-3">
         <p className="text-[11px] text-fail leading-relaxed">

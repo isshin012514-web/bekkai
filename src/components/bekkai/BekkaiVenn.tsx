@@ -88,6 +88,13 @@ export function BekkaiVenn({ scores, ideaCounts, onSelectAxis, onOpenIntegrate }
           onMouseLeave={() => setHover(null)}
         />
       ))}
+      {/* 未評価の円：脈動リングでタップを促す */}
+      {[0, 1, 2].map((i) => (
+        scores[i] === 0 ? (
+          <circle key={`pulse-${i}`} cx={CENTERS[i].cx} cy={CENTERS[i].cy} r={rs[i]} fill="none"
+            stroke={COLORS[i]} strokeWidth="2.5" className="bekkai-pulse-ring" pointerEvents="none" />
+        ) : null
+      ))}
       {/* Hover deepen overlay (separate filled circle so opacity stacks) */}
       {hover !== null && (
         <circle cx={CENTERS[hover].cx} cy={CENTERS[hover].cy} r={rs[hover]} fill={COLORS[hover]} fillOpacity={0.12} pointerEvents="none"
@@ -104,11 +111,13 @@ export function BekkaiVenn({ scores, ideaCounts, onSelectAxis, onOpenIntegrate }
           <g key={i} pointerEvents="none">
             <text x={nx} y={ny - 4} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="600">{NAMES[i][0]}</text>
             <text x={nx} y={ny + 10} textAnchor="middle" fill={COLORS[i]} fontSize="12" fontWeight="600">{NAMES[i][1]}</text>
-            {scores[i] > 0 && (
+            {scores[i] > 0 ? (
               <>
                 <text x={nx} y={ny + 34} textAnchor="middle" fill={COLORS[i]} fontSize="22" fontWeight="800" opacity="0.45">{scores[i]}</text>
                 <text x={nx} y={ny + 48} textAnchor="middle" fill={COLORS[i]} fontSize="9" opacity="0.45">{BEKKAI_SCORE_LABELS[scores[i]]}</text>
               </>
+            ) : (
+              <text x={nx} y={ny + 26} textAnchor="middle" fill={COLORS[i]} fontSize="9" fontWeight="600" opacity="0.7">タップして評価</text>
             )}
           </g>
         )

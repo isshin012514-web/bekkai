@@ -5,6 +5,9 @@ import {
 } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
 import { SampleControls } from '@/components/SampleControls'
+import { SampleHint } from '@/components/SampleHint'
+import { Term } from '@/components/Term'
+import { toast } from '@/stores/toast-store'
 import { generateId, nowISO } from '@/lib/utils'
 import {
   emptyRealizationPower, ADJUST_TYPE_LABELS, INVEST_PATTERN_LABELS, COMBINE_STATUS_LABELS,
@@ -107,6 +110,7 @@ function CombinationSub({ rp, save }: { rp: RealizationPower; save: (next: Parti
       created_at: nowISO(),
     }
     save({ combinations: [item, ...items] })
+    toast('追加しました')
     setF(empty); setAdding(false)
   }
   const remove = (id: string) => save({ combinations: items.filter((i) => i.id !== id) })
@@ -219,6 +223,7 @@ function QuantityQualitySub({ rp, save }: { rp: RealizationPower; save: (next: P
     if (!f.theme.trim()) return
     const item: QuantityQuality = { ...f, theme: f.theme.trim(), id: generateId(), created_at: nowISO() }
     save({ quantityQualities: [item, ...items] })
+    toast('追加しました')
     setF(empty); setAdding(false)
   }
   const remove = (id: string) => save({ quantityQualities: items.filter((i) => i.id !== id) })
@@ -231,7 +236,7 @@ function QuantityQualitySub({ rp, save }: { rp: RealizationPower; save: (next: P
 
   return (
     <SubSection icon={<Repeat size={14} />} title="量 → 質" sub="量をこなして質に転化させる" count={items.length}>
-      <Note>根本に必要なのは質。だが量をこなすことで質に転化する。3つの投資パターンを問題に当てはめ、1万時間を目処に逆算。雑用を1万時間やっても無意味、内容に細心の注意を。</Note>
+      <Note>根本に必要なのは質。だが量をこなすことで質に転化する。3つの投資パターン（正比・<Term def="投資しても一度後退し、ある点から急に正へ転じる成長曲線。最初は成果が出にくいが、続けると跳ねる。">Jカーブ</Term>・ループ）を問題に当てはめ、1万時間を目処に逆算。雑用を1万時間やっても無意味、内容に細心の注意を。</Note>
       <div className="space-y-2">
         {items.map((i) => {
           const pct = i.targetHours > 0 ? Math.min(100, Math.round((i.doneHours / i.targetHours) * 100)) : 0
@@ -324,6 +329,7 @@ function TeamSub({ rp, save }: { rp: RealizationPower; save: (next: Partial<Real
     if (!f.name.trim()) return
     const item: TeamMember = { ...f, name: f.name.trim(), role: f.role.trim(), id: generateId(), created_at: nowISO() }
     save({ team: [item, ...items] })
+    toast('追加しました')
     setF(empty); setAdding(false)
   }
   const remove = (id: string) => save({ team: items.filter((i) => i.id !== id) })
@@ -341,7 +347,7 @@ function TeamSub({ rp, save }: { rp: RealizationPower; save: (next: Partial<Real
       <div className="bg-real-bg rounded-lg p-3 mb-3">
         <div className="flex items-center gap-1.5 mb-1.5">
           <Sparkles size={12} className="text-real" />
-          <span className="text-[11px] font-medium text-real">自信（根拠のない自信）</span>
+          <span className="text-[11px] font-medium text-real">自信（<Term def="実績や保証がなくても『自分ならできる』と信じる力。別解を実現するリーダーシップの核で、これがメンバーを動かす。">根拠のない自信</Term>）</span>
         </div>
         {editingConfidence ? (
           <div className="space-y-2">
@@ -426,10 +432,12 @@ export function RealizationPowerHome() {
 
   const rp = realizationPower
   const save = (next: Partial<RealizationPower>) => setRealizationPower({ ...rp, ...next })
+  const isEmpty = rp.combinations.length === 0 && rp.quantityQualities.length === 0 && rp.team.length === 0 && !rp.confidence.trim()
 
   return (
     <div className="pb-6">
       <SampleControls feature="realization" accent="#EA580C" />
+      {isEmpty && <div className="mt-3 flex justify-center"><SampleHint feature="realization" accent="#EA580C" /></div>}
       <div className="mx-4 mt-4 bg-real-bg rounded-lg px-4 py-3">
         <p className="text-[11px] text-real leading-relaxed">
           <Rocket size={12} className="inline mr-1" />

@@ -3,6 +3,7 @@ import { Plus, ChevronLeft, Trash2, Star } from 'lucide-react'
 import type { BekkaiAxis } from '@/lib/types'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { SampleControls } from '@/components/SampleControls'
+import { SampleHint } from '@/components/SampleHint'
 import { BekkaiVenn } from './BekkaiVenn'
 import { HintTicker } from './HintTicker'
 import { AreaSheet } from './AreaSheet'
@@ -45,6 +46,7 @@ export function BekkaiHome() {
           <div className="text-center text-text-tertiary text-[13px] leading-loose px-8 py-12">
             <div className="text-3xl opacity-40 mb-3">◑◐</div>
             「自分らしい」「優れた」「別の」やり方を<br />組み合わせて、自分なりの別解を見つけましょう。
+            <div className="mt-4 flex justify-center"><SampleHint feature="bekkai" accent="#DC2626" /></div>
           </div>
         ) : (
           <section className="mx-4 mt-4">

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { TrendingUp, Search, Sparkles, Rocket, AlertTriangle, LineChart, ChevronRight } from 'lucide-react'
+import { TrendingUp, Search, Sparkles, Rocket, AlertTriangle, LineChart, ChevronRight, ArrowRight, Cloud } from 'lucide-react'
 import type { AppTab } from '@/components/AppHeader'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
@@ -21,16 +21,32 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
     const discoveryCount = Object.values(entries ?? {}).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0)
     const failCount = failurePower ? Object.values(failurePower).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
     const realCount = realizationPower ? realizationPower.combinations.length + realizationPower.quantityQualities.length + realizationPower.team.length : 0
+    // 流れ順（発見→別解→実現→失敗→成長）
     return [
-      { key: 'growth' as AppTab, label: '成長力', sub: 'アウトプットで伸ばす', Icon: TrendingUp, color: '#185FA5', count: outputs.length + inputs.length },
-      { key: 'discovery' as AppTab, label: '発見力', sub: '解くべき問題を見つける', Icon: Search, color: '#7c6cff', count: discoveryCount },
-      { key: 'bekkai' as AppTab, label: '別解力', sub: '自分の答えを出す', Icon: Sparkles, color: '#DC2626', count: bekkais.length },
-      { key: 'realization' as AppTab, label: '実現力', sub: '別解を形にする', Icon: Rocket, color: '#EA580C', count: realCount },
-      { key: 'failure' as AppTab, label: '失敗力', sub: '転びを糧にする', Icon: AlertTriangle, color: '#0D9488', count: failCount },
+      { key: 'discovery' as AppTab, label: '発見力', sub: '解くべき問題を見つける', Icon: Search, color: '#7c6cff', count: discoveryCount, badge: 'STEP ①' },
+      { key: 'bekkai' as AppTab, label: '別解力', sub: '自分の答えを出す', Icon: Sparkles, color: '#DC2626', count: bekkais.length, badge: 'STEP ②' },
+      { key: 'realization' as AppTab, label: '実現力', sub: '別解を形にする', Icon: Rocket, color: '#EA580C', count: realCount, badge: 'STEP ③' },
+      { key: 'failure' as AppTab, label: '失敗力', sub: '転びを糧にする', Icon: AlertTriangle, color: '#0D9488', count: failCount, badge: 'ループ' },
+      { key: 'growth' as AppTab, label: '成長力', sub: 'アウトプットで伸ばす', Icon: TrendingUp, color: '#185FA5', count: outputs.length + inputs.length, badge: '土台' },
     ]
   }, [outputs, inputs, entries, failurePower, realizationPower, bekkais])
 
   const total = forces.reduce((s, f) => s + f.count, 0)
+
+  // 次にやること：発見→別解→実現の順で、最初に空のステップを提案
+  const nextStep = useMemo(() => {
+    const flow = forces.slice(0, 3) // discovery, bekkai, realization
+    const empty = flow.find((f) => f.count === 0)
+    if (empty) {
+      const msg: Record<string, string> = {
+        discovery: 'まず発見力で「解くべき問題」を1つ見つけよう',
+        bekkai: '見つけた課題に、別解力で自分の答えを出そう',
+        realization: 'その別解を、実現力で形にしよう',
+      }
+      return { key: empty.key, color: empty.color, label: empty.label, text: msg[empty.key] }
+    }
+    return { key: 'dashboard' as AppTab, color: '#185FA5', label: '成長の可視化', text: 'いい流れ。成長の可視化で振り返ろう' }
+  }, [forces])
 
   return (
     <div className="pb-6">
@@ -43,6 +59,21 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           <span>今週のOUT <b className="text-base">{weekOut}</b> 件</span>
         </div>
       </div>
+
+      {/* 次にやること */}
+      <button
+        onClick={() => onNavigate(nextStep.key)}
+        className="mx-4 mt-3 w-[calc(100%-2rem)] flex items-center gap-3 rounded-xl px-4 py-3 text-left active:scale-[0.99] transition-transform"
+        style={{ background: `${nextStep.color}14`, border: `1px solid ${nextStep.color}33` }}
+      >
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-medium" style={{ color: nextStep.color }}>次にやること</p>
+          <p className="text-[13px] text-text-primary font-medium leading-snug mt-0.5">{nextStep.text}</p>
+        </div>
+        <span className="flex items-center gap-1 text-[12px] font-medium shrink-0" style={{ color: nextStep.color }}>
+          {nextStep.label}<ArrowRight size={14} />
+        </span>
+      </button>
 
       {/* 5つの力 */}
       <p className="mx-4 mt-5 mb-2 text-[12px] font-medium text-text-secondary">5つの力</p>
@@ -57,11 +88,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${f.color}1A` }}>
                 <f.Icon size={18} style={{ color: f.color }} />
               </span>
-              {f.count > 0 && (
-                <span className="text-[11px] font-semibold" style={{ color: f.color }}>{f.count}</span>
-              )}
+              <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${f.color}14`, color: f.color }}>{f.badge}</span>
             </div>
-            <p className="text-[13px] font-semibold mt-2" style={{ color: f.color }}>{f.label}</p>
+            <div className="flex items-baseline gap-1.5 mt-2">
+              <p className="text-[13px] font-semibold" style={{ color: f.color }}>{f.label}</p>
+              {f.count > 0 && <span className="text-[10px] text-text-tertiary">{f.count}件</span>}
+            </div>
             <p className="text-[10px] text-text-tertiary leading-tight mt-0.5">{f.sub}</p>
           </button>
         ))}
@@ -84,8 +116,18 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         </button>
       </div>
 
+      {/* クラウド同期への導線 */}
+      <button
+        onClick={() => onNavigate('data')}
+        className="mx-4 mt-3 w-[calc(100%-2rem)] flex items-center gap-2 border border-border-card rounded-xl px-4 py-2.5 hover:bg-surface-secondary transition-colors active:scale-[0.99]"
+      >
+        <Cloud size={15} className="text-primary shrink-0" />
+        <span className="text-[12px] text-text-secondary flex-1 text-left">クラウド同期・バックアップ</span>
+        <ChevronRight size={15} className="text-text-tertiary" />
+      </button>
+
       {/* フロー（5つの力のつながり） */}
-      <div className="mx-4 mt-5 bg-surface-secondary rounded-xl px-3 py-3">
+      <div className="mx-4 mt-3 bg-surface-secondary rounded-xl px-3 py-3">
         <p className="text-[10px] text-text-tertiary mb-2">流れ</p>
         <div className="flex items-center justify-center gap-1 flex-wrap text-[11px]">
           {[['発見', '#7c6cff'], ['別解', '#DC2626'], ['実現', '#EA580C']].map(([t, c], i) => (

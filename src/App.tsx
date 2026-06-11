@@ -24,6 +24,7 @@ import { HomeScreen } from '@/components/HomeScreen'
 import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
 import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
+import { Toaster } from '@/components/Toaster'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
@@ -50,8 +51,10 @@ function App() {
 
   const NON_GUIDE: AppTab[] = ['home', 'dashboard', 'data']
   const shownThisSession = useRef<Set<AppTab>>(new Set())
+  // 全体オンボーディングを見た後は各機能ガイドを自動表示しない（モーダル疲れ防止）。
+  // 使い方はヘッダーの「？」からいつでも開ける。
   const shouldAutoShow = (tab: AppTab) =>
-    !NON_GUIDE.includes(tab) && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
+    !isOnboarded() && !NON_GUIDE.includes(tab) && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
 
   const [activeTab, setActiveTab] = useState<AppTab>('home')
   const [onboardingOpen, setOnboardingOpen] = useState(() => !isOnboarded())
@@ -169,6 +172,7 @@ function App() {
       </main>
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <Toaster />
     </>
   )
 }

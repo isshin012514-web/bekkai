@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 別解力の未評価の円を脈動させてタップを促す */
+@keyframes bekkai-ring {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.7; }
+}
+.bekkai-pulse-ring { animation: bekkai-ring 1.8s ease-in-out infinite; }
+
 @keyframes slide-up {
   from {
     transform: translateY(100%);

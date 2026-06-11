@@ -325,8 +325,10 @@ export default function CellDetail({ moduleId, cellId, onNavigate, focusIndex })
                 <button
                   onClick={handleSave}
                   disabled={!draft.trim()}
-                  className="flex-1 py-2 rounded-lg text-xs font-medium text-white transition-opacity disabled:opacity-40"
-                  style={{ background: `var(--color-${mod.color})` }}
+                  className="flex-1 py-2 rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed"
+                  style={draft.trim()
+                    ? { background: `var(--color-${mod.color})`, color: '#fff' }
+                    : { background: 'var(--color-surface-3)', color: 'var(--color-text-muted)' }}
                 >
                   保存
                 </button>
@@ -781,7 +783,8 @@ function SpecialAddForm({ cellId, cellName, color, onAdd }) {
           )}
 
           <div className="flex gap-2">
-            <button onClick={submit} disabled={!canSave} className="flex-1 py-2 rounded-lg text-xs font-medium text-white transition-opacity disabled:opacity-40" style={{ background: accent }}>
+            <button onClick={submit} disabled={!canSave} className="flex-1 py-2 rounded-lg text-xs font-medium transition-colors disabled:cursor-not-allowed"
+              style={canSave ? { background: accent, color: '#fff' } : { background: 'var(--color-surface-3)', color: 'var(--color-text-muted)' }}>
               保存
             </button>
             <button onClick={reset} className="flex-1 py-2 rounded-lg text-xs text-text-dim bg-surface-2 hover:text-text transition-colors">
