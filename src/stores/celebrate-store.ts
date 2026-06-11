@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { haptic } from '@/lib/haptics'
 
 let counter = 0
 
@@ -9,7 +10,7 @@ interface CelebrateState {
 
 export const useCelebrate = create<CelebrateState>((set) => ({
   id: 0,
-  fire: () => set({ id: ++counter }),
+  fire: () => { haptic('success'); set({ id: ++counter }) },
 }))
 
 /** 祝祭エフェクトを発火（非Reactからも呼べる） */

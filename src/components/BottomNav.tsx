@@ -1,5 +1,6 @@
 import { Home, TrendingUp, Search, Sparkles, Rocket, AlertTriangle } from 'lucide-react'
 import type { AppTab } from '@/components/AppHeader'
+import { haptic } from '@/lib/haptics'
 
 const FORCES: { key: AppTab; label: string; Icon: typeof TrendingUp; color: string }[] = [
   { key: 'home', label: 'ホーム', Icon: Home, color: '#475569' },
@@ -31,7 +32,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           return (
             <button
               key={key}
-              onClick={() => { if (on) window.scrollTo({ top: 0, behavior: 'smooth' }); else onTabChange(key) }}
+              onClick={() => { haptic('select'); if (on) window.scrollTo({ top: 0, behavior: 'smooth' }); else onTabChange(key) }}
               aria-label={label}
               aria-pressed={on}
               className="flex-1 flex items-center justify-center min-w-0 min-h-[44px]"

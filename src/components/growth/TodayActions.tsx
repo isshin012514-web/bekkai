@@ -25,10 +25,10 @@ export function TodayActions({ onAddOutput, onAddInput, onSelfScore, onEnterFeed
 
         <ArrowDown size={14} className="text-primary/40 my-1" />
 
-        {/* Step 2: Output */}
+        {/* Step 2: Output（他と同じアウトライン基調で統一・サイズで主役感） */}
         <button
           onClick={onAddOutput}
-          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-primary text-primary bg-surface rounded-lg text-sm font-semibold hover:bg-primary-bg transition-colors"
         >
           <Plus size={16} />
           アウトプットを記録

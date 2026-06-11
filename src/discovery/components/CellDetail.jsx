@@ -618,6 +618,18 @@ function SpecialAddForm({ cellId, cellName, color, onAdd }) {
   const [value, setValue] = useState('')
   const [tone, setTone] = useState('info')
 
+  // 比較セル用：記録した自分の他項目（強み・できること等）から引用
+  const allEntries = useEntriesStore((s) => s.entries)
+  const compareSuggestions = (() => {
+    if (cellId !== 'compare') return []
+    const out = []
+    for (const key of ['self-strength', 'self-can', 'self-weakness', 'self-cant']) {
+      const list = allEntries[key]
+      if (Array.isArray(list)) for (const e of list) { const t = typeof e === 'string' ? e : (e?.text || e?.name); if (t && t.trim()) out.push(t.trim()) }
+    }
+    return [...new Set(out)].slice(0, 6)
+  })()
+
   const accent = `var(--color-${color})`
   const inputCls = 'w-full bg-surface-2 rounded-lg p-3 text-sm text-text border border-border focus:border-accent outline-none'
 
@@ -692,13 +704,25 @@ function SpecialAddForm({ cellId, cellName, color, onAdd }) {
           {/* 比較セルは label / value */}
           {cellId === 'compare' ? (
             <>
+              {compareSuggestions.length > 0 && (
+                <div className="space-y-1">
+                  <label className="text-[11px] font-medium text-text-muted">記録した自分の項目から引用</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {compareSuggestions.map((s, i) => (
+                      <button key={i} type="button" onClick={() => setLabel(s)}
+                        className="text-[11px] px-2.5 py-1 rounded-full border transition-colors"
+                        style={{ borderColor: 'color-mix(in srgb, var(--color-accent) 45%, transparent)', color: 'var(--color-accent)' }}>{s}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-text-muted">比較軸</label>
-                <input value={label} onChange={(e) => setLabel(e.target.value)} autoFocus placeholder="例：同期比 / 過去の自分比" className={inputCls} />
+                <label className="text-[11px] font-medium text-text-muted">何を比べる（対象）</label>
+                <input value={label} onChange={(e) => setLabel(e.target.value)} autoFocus placeholder="例：企画力 / 営業力（上のチップからも選べる）" className={inputCls} />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-text-muted">評価</label>
-                <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="例：企画力 上位" className={inputCls} />
+                <label className="text-[11px] font-medium text-text-muted">どこで・相対ポジション</label>
+                <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="例：組織内で3位くらい / 日本で上位10% / 同業の中で中位" className={inputCls} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-text-muted">トーン</label>

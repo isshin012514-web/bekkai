@@ -7,6 +7,8 @@ import { useEntriesStore } from '@/discovery/stores/entries-store'
 import { weeklyOutputs } from '@/lib/utils'
 import { currentStreak } from '@/lib/daily'
 import { DailyPrompt } from '@/components/DailyPrompt'
+import { CountUp } from '@/components/CountUp'
+import { Badges } from '@/components/Badges'
 
 interface HomeScreenProps {
   onNavigate: (tab: AppTab) => void
@@ -63,23 +65,30 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
 
   return (
     <div className="pb-6">
-      {/* ヒーロー */}
-      <div className="mx-4 mt-4 rounded-2xl px-5 py-5 text-white" style={{ background: 'linear-gradient(135deg,#185FA5,#7c6cff)' }}>
-        <p className="text-[11px] opacity-80">ようこそ</p>
-        <h1 className="text-xl font-bold mt-0.5">答えのない問いに、<br />自分の<span className="underline decoration-2 underline-offset-2">別解</span>を。</h1>
-        <div className="flex gap-4 mt-3 text-[12px] items-center">
-          <span>記録 <b className="text-base">{total}</b> 件</span>
-          <span>今週のOUT <b className="text-base">{weekOut}</b> 件</span>
-          {streak > 0 && (
-            <span className="flex items-center gap-0.5 ml-auto bg-white/20 rounded-full px-2 py-0.5">
-              <Flame size={13} /><b className="text-base">{streak}</b>日連続
-            </span>
-          )}
+      {/* ヒーロー（メッシュグラデ） */}
+      <div className="mesh-hero mx-4 mt-4 rounded-2xl px-5 py-5 text-white" style={{ background: 'linear-gradient(135deg,#185FA5,#7c6cff)' }}>
+        <div className="relative z-10">
+          <p className="text-[11px] opacity-80">ようこそ</p>
+          <h1 className="text-xl font-bold mt-0.5">答えのない問いに、<br />自分の<span className="underline decoration-2 underline-offset-2">別解</span>を。</h1>
+          <div className="flex gap-4 mt-3 text-[12px] items-center">
+            <span>記録 <CountUp value={total} className="text-base font-bold" /> 件</span>
+            <span>今週のOUT <CountUp value={weekOut} className="text-base font-bold" /> 件</span>
+            {streak > 0 && (
+              <span className="flex items-center gap-0.5 ml-auto rounded-full px-2 py-0.5"
+                style={{ background: streak >= 30 ? 'rgba(245,158,11,.45)' : streak >= 7 ? 'rgba(234,88,12,.4)' : 'rgba(255,255,255,.2)' }}>
+                <Flame size={streak >= 7 ? 15 : 13} className={streak >= 7 ? 'drop-shadow' : ''} />
+                <b className="text-base"><CountUp value={streak} /></b>日連続
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* 今日の問い */}
       <DailyPrompt />
+
+      {/* 獲得した称号 */}
+      <Badges />
 
       {/* 次にやること */}
       <button

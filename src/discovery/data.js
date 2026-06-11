@@ -125,7 +125,7 @@ export const MODULE_DETAILS = {
       { id: 'condition', name: '発動条件', sub: '成果が出る環境', icon: '🟢' },
       { id: 'break', name: '壊れる条件', sub: '失敗する環境', icon: '🔴' },
       { id: 'others', name: '他者視点', sub: '周りからの評価', icon: '👥' },
-      { id: 'compare', name: '比較', sub: '相対ポジション', icon: '📊' },
+      { id: 'compare', name: '比較', sub: '組織・日本での順位', icon: '📊' },
     ],
   },
   around: {
@@ -204,6 +204,41 @@ export const DEMO_CELL_ENTRIES = {
   ],
   'future-next': [
     { id: 'd-ft1', text: '発信の型をつくって量産できるようにする', created_at: '2026-05-24T09:00:00.000Z' },
+  ],
+  // ── 各モジュールを一通りサンプルで埋める ──
+  'goal-number': [
+    { id: 'd-gn1', text: 'フォロワー1,000人 / 月間PV 1万', created_at: '2026-05-21T09:10:00.000Z' },
+  ],
+  'goal-deadline': [
+    { id: 'd-gd1', text: '半年後（2026年内）', created_at: '2026-05-21T09:20:00.000Z' },
+  ],
+  'problem-root': [
+    { id: 'd-pr1', text: '「完璧じゃないと出せない」という思い込み', reason: '過去に雑な発信で批判された経験', created_at: '2026-05-21T09:30:00.000Z' },
+  ],
+  'past-origin': [
+    { id: 'd-po1', text: '独学で挫折しかけた時、先輩の一言で救われた', created_at: '2026-05-19T09:00:00.000Z' },
+  ],
+  'self-can': [
+    { id: 'd-sc1', text: '複雑な話を図解1枚に落とす', level: 4, detail: '社内資料で評価された', created_at: '2026-05-22T09:30:00.000Z' },
+  ],
+  'self-compare': [
+    { id: 'd-scm1', label: '図解・言語化力', value: '組織内で上位3人くらい', color: 'success', created_at: '2026-05-22T10:00:00.000Z' },
+    { id: 'd-scm2', label: '発信の継続力', value: '日本の発信者の中では中の下', color: 'warning', created_at: '2026-05-22T10:05:00.000Z' },
+  ],
+  'around-ally': [
+    { id: 'd-aa1', text: '同業の友人（壁打ち相手）', created_at: '2026-05-23T09:00:00.000Z' },
+  ],
+  'around-time': [
+    { id: 'd-at1', text: '平日夜1時間 / 週末3時間', created_at: '2026-05-23T09:10:00.000Z' },
+  ],
+  'market-competitor': [
+    { id: 'd-mco1', text: '体系的に教える発信者が多い（自分は"過程"で差別化）', created_at: '2026-05-23T09:20:00.000Z' },
+  ],
+  'market-gap': [
+    { id: 'd-mg1', text: '「失敗の過程」を見せる発信が少ない', created_at: '2026-05-23T09:30:00.000Z' },
+  ],
+  'future-bet': [
+    { id: 'd-fb1', text: '「等身大の失敗実況」スタイルに集中投下', created_at: '2026-05-24T09:10:00.000Z' },
   ],
 }
 

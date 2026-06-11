@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
 import { toast } from '@/stores/toast-store'
+import { haptic } from '@/lib/haptics'
 
 /**
  * どこからでも開けるクイックメモ。思いつきを成長力のインプット（その他）として保存。
@@ -28,7 +29,7 @@ export function QuickCapture() {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { haptic('light'); setOpen(true) }}
         aria-label="クイックメモ"
         className="fixed right-4 z-30 w-12 h-12 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 78px)' }}
