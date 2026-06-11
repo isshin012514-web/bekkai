@@ -722,7 +722,9 @@ function SpecialAddForm({ cellId, cellName, color, onAdd }) {
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-text-muted">どこで・相対ポジション</label>
-                <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="例：組織内で3位くらい / 日本で上位10% / 同業の中で中位" className={inputCls} />
+                <textarea value={value} onChange={(e) => setValue(e.target.value)} rows={2}
+                  placeholder="例：組織内で3位くらい / 日本で上位10% / 同業の中で中位"
+                  className={`${inputCls} resize-none leading-relaxed`} />
               </div>
               <div className="space-y-1.5">
                 <label className="text-[11px] font-medium text-text-muted">トーン</label>

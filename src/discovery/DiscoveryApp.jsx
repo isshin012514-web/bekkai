@@ -6,11 +6,21 @@ import CellDetail from './components/CellDetail'
 import ConceptView from './components/ConceptView'
 import ReviewView from './components/ReviewView'
 import { DataProvider } from './DataContext'
+import { useEntriesStore } from './stores/entries-store'
+import { toast } from '@/stores/toast-store'
 
 export default function DiscoveryApp({ data }) {
   const [view, setView] = useState({ type: 'home' })
 
-  const navigate = (to) => setView(to)
+  // 段階的開示：「自分」が空のうちは他モジュールへ入れない（どの経路でも）
+  const navigate = (to) => {
+    if ((to.type === 'module' || to.type === 'cell') && to.moduleId && to.moduleId !== 'self') {
+      const e = useEntriesStore.getState().entries
+      const selfCount = Object.entries(e).filter(([k]) => k.startsWith('self-')).reduce((n, [, v]) => n + (Array.isArray(v) ? v.length : 0), 0)
+      if (selfCount === 0) { toast('「自分」を1つ埋めると解放されます'); return }
+    }
+    setView(to)
+  }
   const goHome = () => navigate({ type: 'home' })
   const goBack = () => {
     if (view.type === 'cell' && view.from === 'review') navigate({ type: 'review' })

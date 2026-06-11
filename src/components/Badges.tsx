@@ -41,7 +41,7 @@ export function Badges() {
     if (fresh.length > 0 && seen.length >= 0) {
       // 初回ロードで一気に獲得済みを祝わないよう、seen が未保存(null)なら祝わず保存だけ
       const hadKey = localStorage.getItem(SEEN_KEY) !== null
-      if (hadKey) { celebrate(); toast(`${fresh[0].emoji} 称号「${fresh[0].label}」を獲得！`) }
+      if (hadKey) { celebrate(); toast(`🎖 称号「${fresh[0].label}」を獲得！`) }
       try { localStorage.setItem(SEEN_KEY, JSON.stringify(earned.map((b) => b.key))) } catch { /* noop */ }
     }
   }, [earned])
@@ -57,9 +57,12 @@ export function Badges() {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {earned.map((b) => (
           <div key={b.key} title={b.desc}
-            className="shrink-0 flex flex-col items-center justify-center gap-0.5 w-16 h-16 rounded-xl border border-border-card bg-surface">
-            <span className="text-xl leading-none">{b.emoji}</span>
-            <span className="text-[8px] text-text-tertiary text-center leading-tight px-1">{b.label}</span>
+            className="shrink-0 flex flex-col items-center justify-center gap-1 w-16 h-[68px] rounded-xl border bg-surface"
+            style={{ borderColor: `${b.color}33` }}>
+            <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${b.color}1A` }}>
+              <b.Icon size={17} style={{ color: b.color }} strokeWidth={2.2} />
+            </span>
+            <span className="text-[8px] text-text-secondary text-center leading-tight px-1">{b.label}</span>
           </div>
         ))}
       </div>

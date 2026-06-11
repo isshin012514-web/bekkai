@@ -8,8 +8,8 @@ export function LockGate({ title, requirement }: { title: string; requirement: s
         <Lock size={14} className="text-text-tertiary" />
       </span>
       <div className="min-w-0">
-        <p className="text-[12px] font-medium text-text-secondary">{title}</p>
-        <p className="text-[10px] text-text-tertiary leading-relaxed mt-0.5">🔒 {requirement}</p>
+        <p className="text-[12px] font-medium text-text-secondary">{title}<span className="ml-1.5 text-[9px] text-text-tertiary border border-border-card rounded px-1 py-0.5 align-middle">ロック中</span></p>
+        <p className="text-[10px] text-text-tertiary leading-relaxed mt-0.5">{requirement}</p>
       </div>
     </section>
   )

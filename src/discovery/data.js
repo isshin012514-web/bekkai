@@ -180,66 +180,85 @@ export const CELL_ENTRIES = {}
  * デモ用のサンプル入力。`${moduleId}-${cellId}` をキーに、entries-store と同じ
  * オブジェクト形（{ id, text, created_at, reason? } / self は level/detail 付き）で持つ。
  */
+// 全64マス（8モジュール×8セル）をサンプルで埋める
+const D = '2026-05-22T09:00:00.000Z'
+const txt = (id, text, extra = {}) => [{ id, text, created_at: D, ...extra }]
 export const DEMO_CELL_ENTRIES = {
-  'purpose-why': [
-    { id: 'd-pw1', text: '学んだことを誰かの役に立つ形にしたい', reason: '自分が独学で苦労した経験があるから', created_at: '2026-05-20T09:00:00.000Z' },
-  ],
-  'purpose-ideal': [
-    { id: 'd-pi1', text: '「あの人の発信で動けた」と言われる存在', created_at: '2026-05-20T09:00:00.000Z' },
-  ],
-  'goal-state': [
-    { id: 'd-gs1', text: '月1本、反応のある発信を継続できている', created_at: '2026-05-21T09:00:00.000Z' },
-  ],
-  'problem-gap': [
-    { id: 'd-pg1', text: 'インプットは多いがアウトプットが続かない', reason: '完璧を求めて出すのが遅れる', created_at: '2026-05-21T09:00:00.000Z' },
-  ],
-  'self-strength': [
-    { id: 'd-ss1', text: '現場の試行錯誤を等身大で言語化できる', level: 4, detail: '失敗込みで語れるので共感されやすい', created_at: '2026-05-22T09:00:00.000Z' },
-  ],
-  'self-weakness': [
-    { id: 'd-sw1', text: '完璧主義で着手・公開が遅い', level: 3, detail: '8割で出す癖をつける', fix: '下書きを翌日までに必ず公開', created_at: '2026-05-22T09:00:00.000Z' },
-  ],
-  'market-customer': [
-    { id: 'd-mc1', text: '自分と同じく独学でつまずいている初学者', created_at: '2026-05-23T09:00:00.000Z' },
-  ],
-  'future-next': [
-    { id: 'd-ft1', text: '発信の型をつくって量産できるようにする', created_at: '2026-05-24T09:00:00.000Z' },
-  ],
-  // ── 各モジュールを一通りサンプルで埋める ──
-  'goal-number': [
-    { id: 'd-gn1', text: 'フォロワー1,000人 / 月間PV 1万', created_at: '2026-05-21T09:10:00.000Z' },
-  ],
-  'goal-deadline': [
-    { id: 'd-gd1', text: '半年後（2026年内）', created_at: '2026-05-21T09:20:00.000Z' },
-  ],
-  'problem-root': [
-    { id: 'd-pr1', text: '「完璧じゃないと出せない」という思い込み', reason: '過去に雑な発信で批判された経験', created_at: '2026-05-21T09:30:00.000Z' },
-  ],
-  'past-origin': [
-    { id: 'd-po1', text: '独学で挫折しかけた時、先輩の一言で救われた', created_at: '2026-05-19T09:00:00.000Z' },
-  ],
-  'self-can': [
-    { id: 'd-sc1', text: '複雑な話を図解1枚に落とす', level: 4, detail: '社内資料で評価された', created_at: '2026-05-22T09:30:00.000Z' },
-  ],
+  // 目的
+  'purpose-why': txt('d1', '学んだことを誰かの役に立つ形にしたい', { reason: '自分が独学で苦労したから' }),
+  'purpose-origin': txt('d2', '独学で挫折しかけた時、先輩の一言で救われた'),
+  'purpose-anger': txt('d3', '分かりにくい解説で時間を溶かした悔しさ'),
+  'purpose-ideal': txt('d4', '「あの人の発信で動けた」と言われる存在'),
+  'purpose-value': txt('d5', '誠実さ・等身大であること'),
+  'purpose-who': txt('d6', '独学でつまずく初学者'),
+  'purpose-mission': txt('d7', '遠回りを減らす道しるべになる'),
+  'purpose-passion': txt('d8', '自分の失敗が誰かの近道になる瞬間'),
+  // 目標
+  'goal-state': txt('d9', '月1本、反応のある発信を継続できている'),
+  'goal-number': txt('d10', 'フォロワー1,000人 / 月間PV 1万'),
+  'goal-deadline': txt('d11', '半年後（2026年内）'),
+  'goal-milestone': txt('d12', '3ヶ月で記事10本'),
+  'goal-criteria': txt('d13', '保存・コメントが付くこと'),
+  'goal-priority': txt('d14', '量より「続ける仕組み」を優先'),
+  'goal-scope': txt('d15', '扱うのは"学びの過程"だけ（網羅しない）'),
+  'goal-reward': txt('d16', '達成したら新しい機材を買う'),
+  // 問題
+  'problem-gap': txt('d17', 'インプットは多いがアウトプットが続かない', { reason: '完璧を求めて出すのが遅れる' }),
+  'problem-blocker': txt('d18', '完璧主義で公開前に止まる'),
+  'problem-fail': txt('d19', '下書きのまま放置して消してしまう'),
+  'problem-root': txt('d20', '「完璧じゃないと出せない」という思い込み', { reason: '過去に雑な発信で批判された' }),
+  'problem-pain': txt('d21', '「で、結局どうすれば」で手が止まる'),
+  'problem-risk': txt('d22', '反応ゼロでモチベが切れる'),
+  'problem-blind': txt('d23', '自分の"普通"が他人には価値かも、に気づけてない'),
+  'problem-assumption': txt('d24', '「ちゃんとした人しか発信できない」は本当？'),
+  // 昔
+  'past-top': txt('d25', '業界トップは"継続"で抜けている'),
+  'past-crossover': txt('d26', '営業×発信の掛け算が効いた人がいる'),
+  'past-winpath': txt('d27', '小さく出して反応で磨くのが王道'),
+  'past-standard': txt('d28', '一次情報＋一枚図解が定番の型'),
+  'past-success': txt('d29', '社内勉強会が好評だった'),
+  'past-failure': txt('d30', '凝りすぎて公開を逃した企画'),
+  'past-pattern': txt('d31', '最初は伸びず、ある点から伸びる（Jカーブ）'),
+  'past-lesson': txt('d32', '出さないと何も始まらない'),
+  // 自分
+  'self-strength': [{ id: 'd33', text: '現場の試行錯誤を等身大で言語化できる', level: 4, detail: '失敗込みで語れて共感されやすい', created_at: D }],
+  'self-weakness': [{ id: 'd34', text: '完璧主義で公開が遅い', level: 3, detail: '8割で出す癖をつける', fix: '下書きを翌朝までに必ず公開', created_at: D }],
+  'self-can': [{ id: 'd35', text: '複雑な話を図解1枚に落とす', level: 4, detail: '社内資料で評価された', created_at: D }],
+  'self-cant': [{ id: 'd36', text: '動画編集が苦手', type: '任せる', action: '外注 or テンプレ活用', created_at: D }],
+  'self-condition': txt('d37', '締切と裁量があると燃える'),
+  'self-break': txt('d38', '細かい干渉が多いと止まる'),
+  'self-others': [{ id: 'd39', from: '先輩', text: '説明がわかりやすいと言われる', created_at: D }],
   'self-compare': [
-    { id: 'd-scm1', label: '図解・言語化力', value: '組織内で上位3人くらい', color: 'success', created_at: '2026-05-22T10:00:00.000Z' },
-    { id: 'd-scm2', label: '発信の継続力', value: '日本の発信者の中では中の下', color: 'warning', created_at: '2026-05-22T10:05:00.000Z' },
+    { id: 'd40', label: '図解・言語化力', value: '組織内で上位3人くらい', color: 'success', created_at: D },
+    { id: 'd41', label: '発信の継続力', value: '日本の発信者の中では中の下', color: 'warning', created_at: D },
   ],
-  'around-ally': [
-    { id: 'd-aa1', text: '同業の友人（壁打ち相手）', created_at: '2026-05-23T09:00:00.000Z' },
-  ],
-  'around-time': [
-    { id: 'd-at1', text: '平日夜1時間 / 週末3時間', created_at: '2026-05-23T09:10:00.000Z' },
-  ],
-  'market-competitor': [
-    { id: 'd-mco1', text: '体系的に教える発信者が多い（自分は"過程"で差別化）', created_at: '2026-05-23T09:20:00.000Z' },
-  ],
-  'market-gap': [
-    { id: 'd-mg1', text: '「失敗の過程」を見せる発信が少ない', created_at: '2026-05-23T09:30:00.000Z' },
-  ],
-  'future-bet': [
-    { id: 'd-fb1', text: '「等身大の失敗実況」スタイルに集中投下', created_at: '2026-05-24T09:10:00.000Z' },
-  ],
+  // 周り
+  'around-team': txt('d42', '後輩2人に声がけできる'),
+  'around-ally': txt('d43', '同業の友人（壁打ち相手）'),
+  'around-time': txt('d44', '平日夜1時間 / 週末3時間'),
+  'around-money': txt('d45', '月5,000円まで'),
+  'around-tool': txt('d46', 'Notion / Canva / X'),
+  'around-commline': txt('d47', 'X と社内Slack'),
+  'around-boss': txt('d48', '「発信は良いこと」と理解がある'),
+  'around-structure': txt('d49', '副業OKの会社'),
+  // 市場
+  'market-customer': txt('d50', '独学でつまずく初学者'),
+  'market-competitor': txt('d51', '体系的に教える発信者が多い'),
+  'market-trend': txt('d52', '短尺・等身大コンテンツが伸びている'),
+  'market-need': txt('d53', '「失敗の過程」を知りたい人が多い'),
+  'market-evaluation': txt('d54', '保存数・実践報告で測られる'),
+  'market-opportunity': txt('d55', '過程実況の発信者が少ない'),
+  'market-threat': txt('d56', 'AIで"きれいな解説"が量産される'),
+  'market-gap': txt('d57', '「失敗の過程」を見せる発信が少ない'),
+  // 未来
+  'future-next': txt('d58', '発信の型をつくって量産できるようにする'),
+  'future-experiment': txt('d59', '週1で"失敗実況"を試す'),
+  'future-grow': txt('d60', '図解力をさらに伸ばす'),
+  'future-fix': txt('d61', '公開までの時間を半分にする'),
+  'future-quit': txt('d62', '完璧主義をやめる'),
+  'future-delegate': txt('d63', '動画編集は人に任せる'),
+  'future-bet': txt('d64', '「等身大の失敗実況」に集中投下'),
+  'future-vision': txt('d65', '3年後、初学者の定番の道しるべに'),
 }
 
 /**

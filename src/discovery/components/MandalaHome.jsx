@@ -181,7 +181,7 @@ export default function MandalaHome({ onNavigate }) {
           return (
             <button
               key={m.id}
-              onClick={() => locked ? toast('🔒「自分」を1つ埋めると解放されます') : onNavigate({ type: 'module', moduleId: m.id })}
+              onClick={() => locked ? toast('「自分」を1つ埋めると解放されます') : onNavigate({ type: 'module', moduleId: m.id })}
               aria-disabled={locked}
               className={`animate-pop delay-${pos + 1} tile rounded-[22px] flex flex-col items-center justify-center gap-2 relative ${locked ? 'opacity-45' : ''}`}
               style={{
@@ -196,7 +196,9 @@ export default function MandalaHome({ onNavigate }) {
                 />
               )}
               {locked ? (
-                <span className="absolute top-2 right-2 text-[11px] z-10 leading-none">🔒</span>
+                <span className="absolute top-2 right-2 z-10 text-text-muted">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
               ) : st.filled > 0 && (
                 <span
                   className="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[8px] font-bold text-white z-10 mono"
@@ -205,10 +207,10 @@ export default function MandalaHome({ onNavigate }) {
                   {st.filled}
                 </span>
               )}
-              <Icon name={m.id} size={23} className="relative z-10" style={{ color: `var(--color-${m.color})` }} />
+              <Icon name={m.id} size={23} className="relative z-10" style={{ color: locked ? 'var(--color-text-muted)' : `var(--color-${m.color})`, filter: locked ? 'grayscale(1)' : 'none' }} />
               <div className="relative z-10 text-center">
-                <div className="text-[12px] font-semibold text-text leading-none">{m.name}</div>
-                <div className="text-[8px] text-text-muted mt-1">{locked ? '🔒 自分を埋めると解放' : m.sub}</div>
+                <div className={`text-[12px] font-semibold leading-none ${locked ? 'text-text-muted' : 'text-text'}`}>{m.name}</div>
+                <div className="text-[8px] text-text-muted mt-1">{locked ? '自分を埋めると解放' : m.sub}</div>
               </div>
             </button>
           )
