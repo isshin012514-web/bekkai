@@ -6,6 +6,7 @@ import { useEntriesStore } from '@/discovery/stores/entries-store'
 import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
 import { Term } from '@/components/Term'
+import { toast } from '@/stores/toast-store'
 import { BekkaiVenn } from './BekkaiVenn'
 import { HintTicker } from './HintTicker'
 import { AreaSheet } from './AreaSheet'
@@ -244,7 +245,7 @@ export function BekkaiHome() {
         onClose={() => setIntegrateOpen(false)}
         onEditAxis={(ax) => { setIntegrateOpen(false); setTimeout(() => setEditingAxis(ax), 250) }}
         onChangeConclusion={(t) => updateBekkai(active.id, { conclusion: t })}
-        onConfirm={() => setIntegrateOpen(false)}
+        onConfirm={() => { setIntegrateOpen(false); if (active.conclusion?.trim()) toast('✨ 別解がまとまりました') }}
       />
     </div>
   )

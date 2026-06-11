@@ -1,10 +1,12 @@
 import { useMemo } from 'react'
-import { TrendingUp, Search, Sparkles, Rocket, AlertTriangle, LineChart, ChevronRight, ArrowRight, Cloud } from 'lucide-react'
+import { TrendingUp, Search, Sparkles, Rocket, AlertTriangle, LineChart, ChevronRight, ArrowRight, Cloud, Flame } from 'lucide-react'
 import type { AppTab } from '@/components/AppHeader'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
 import { weeklyOutputs } from '@/lib/utils'
+import { currentStreak } from '@/lib/daily'
+import { DailyPrompt } from '@/components/DailyPrompt'
 
 interface HomeScreenProps {
   onNavigate: (tab: AppTab) => void
@@ -16,6 +18,17 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
 
   const weekOut = useMemo(() => weeklyOutputs(outputs).length, [outputs])
+
+  const streak = useMemo(() => {
+    const dates: string[] = []
+    outputs.forEach((o) => dates.push(o.created_at))
+    inputs.forEach((i) => dates.push(i.created_at))
+    bekkais.forEach((b) => dates.push(b.created_at))
+    if (failurePower) Object.values(failurePower).forEach((v) => Array.isArray(v) && v.forEach((x: { created_at?: string }) => x?.created_at && dates.push(x.created_at)))
+    if (realizationPower) [...realizationPower.combinations, ...realizationPower.quantityQualities, ...realizationPower.team].forEach((x) => x?.created_at && dates.push(x.created_at))
+    Object.values(entries ?? {}).forEach((v) => Array.isArray(v) && v.forEach((x: unknown) => { const c = (x as { created_at?: string })?.created_at; if (c) dates.push(c) }))
+    return currentStreak(dates)
+  }, [outputs, inputs, bekkais, failurePower, realizationPower, entries])
 
   const forces = useMemo(() => {
     const discoveryCount = Object.values(entries ?? {}).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0)
@@ -54,11 +67,19 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       <div className="mx-4 mt-4 rounded-2xl px-5 py-5 text-white" style={{ background: 'linear-gradient(135deg,#185FA5,#7c6cff)' }}>
         <p className="text-[11px] opacity-80">ようこそ</p>
         <h1 className="text-xl font-bold mt-0.5">答えのない問いに、<br />自分の<span className="underline decoration-2 underline-offset-2">別解</span>を。</h1>
-        <div className="flex gap-4 mt-3 text-[12px]">
+        <div className="flex gap-4 mt-3 text-[12px] items-center">
           <span>記録 <b className="text-base">{total}</b> 件</span>
           <span>今週のOUT <b className="text-base">{weekOut}</b> 件</span>
+          {streak > 0 && (
+            <span className="flex items-center gap-0.5 ml-auto bg-white/20 rounded-full px-2 py-0.5">
+              <Flame size={13} /><b className="text-base">{streak}</b>日連続
+            </span>
+          )}
         </div>
       </div>
+
+      {/* 今日の問い */}
+      <DailyPrompt />
 
       {/* 次にやること */}
       <button

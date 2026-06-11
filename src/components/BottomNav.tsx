@@ -31,7 +31,7 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
           return (
             <button
               key={key}
-              onClick={() => onTabChange(key)}
+              onClick={() => { if (on) window.scrollTo({ top: 0, behavior: 'smooth' }); else onTabChange(key) }}
               aria-label={label}
               aria-pressed={on}
               className="flex-1 flex items-center justify-center min-w-0 min-h-[44px]"

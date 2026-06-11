@@ -25,6 +25,7 @@ import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
 import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
 import { Toaster } from '@/components/Toaster'
+import { QuickCapture } from '@/components/QuickCapture'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
@@ -172,6 +173,7 @@ function App() {
       </main>
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      {activeTab !== 'data' && <QuickCapture />}
       <Toaster />
     </>
   )

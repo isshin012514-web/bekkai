@@ -1,0 +1,13 @@
+{
+  "name": "bekkai",
+  "short_name": "bekkai",
+  "description": "答えのない問いに、自分の別解を出し、実現する自己分析アプリ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#185FA5",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
