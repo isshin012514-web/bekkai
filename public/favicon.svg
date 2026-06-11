@@ -1,33 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="c1" x1="0.2" y1="0" x2="0.8" y2="1">
-      <stop offset="0%" stop-color="#FF4D9D"/>
-      <stop offset="100%" stop-color="#FF9A3D"/>
+    <linearGradient id="rainbow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF3D6E"/>
+      <stop offset="20%" stop-color="#FF9A3D"/>
+      <stop offset="40%" stop-color="#FFE14D"/>
+      <stop offset="58%" stop-color="#2BE08A"/>
+      <stop offset="78%" stop-color="#36C5FF"/>
+      <stop offset="100%" stop-color="#A05CFF"/>
     </linearGradient>
-    <linearGradient id="c2" x1="0" y1="0.2" x2="1" y2="1">
-      <stop offset="0%" stop-color="#7A5CFF"/>
-      <stop offset="100%" stop-color="#36C5FF"/>
-    </linearGradient>
-    <linearGradient id="c3" x1="1" y1="0.2" x2="0" y2="1">
-      <stop offset="0%" stop-color="#16E0B0"/>
-      <stop offset="100%" stop-color="#36C5FF"/>
-    </linearGradient>
-    <radialGradient id="gloss" cx="35%" cy="28%" r="70%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
-      <stop offset="55%" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
   </defs>
 
   <rect width="512" height="512" fill="#ffffff"/>
 
-  <g style="isolation:isolate">
-    <circle cx="256" cy="186" r="128" fill="url(#c1)" style="mix-blend-mode:multiply"/>
-    <circle cx="184" cy="318" r="128" fill="url(#c2)" style="mix-blend-mode:multiply"/>
-    <circle cx="328" cy="318" r="128" fill="url(#c3)" style="mix-blend-mode:multiply"/>
-  </g>
-
-  <!-- Gemini風の艶 -->
-  <g style="isolation:isolate">
-    <circle cx="256" cy="186" r="128" fill="url(#gloss)" style="mix-blend-mode:screen"/>
+  <g fill="none" stroke="url(#rainbow)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="184" r="118"/>
+    <circle cx="182" cy="318" r="118"/>
+    <circle cx="330" cy="318" r="118"/>
   </g>
 </svg>

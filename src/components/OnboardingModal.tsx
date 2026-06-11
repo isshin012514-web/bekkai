@@ -1,16 +1,24 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
-  X, TrendingUp, Search, Sparkles, Rocket, AlertTriangle, ArrowRight, RefreshCw,
+  X, TrendingUp, Search, Sparkles, Rocket, AlertTriangle, ArrowRight, RefreshCw, LockOpen,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 const ONBOARD_KEY = 'bekkai-onboarded'
+const SKIP_KEY = 'bekkai-onboarding-skip'
 
 export function isOnboarded(): boolean {
   try { return localStorage.getItem(ONBOARD_KEY) === '1' } catch { return true }
 }
 export function markOnboarded() {
   try { localStorage.setItem(ONBOARD_KEY, '1') } catch { /* noop */ }
+}
+/** 起動時に使い方を自動表示しない設定か（既定: 表示する） */
+export function isOnboardingSkipped(): boolean {
+  try { return localStorage.getItem(SKIP_KEY) === '1' } catch { return false }
+}
+function setOnboardingSkip(skip: boolean) {
+  try { skip ? localStorage.setItem(SKIP_KEY, '1') : localStorage.removeItem(SKIP_KEY) } catch { /* noop */ }
 }
 
 interface Power {
@@ -37,13 +45,15 @@ interface OnboardingModalProps {
 
 export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null)
+  const [dontShow, setDontShow] = useState(isOnboardingSkipped())
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : ''
+    if (open) setDontShow(isOnboardingSkipped())
     return () => { document.body.style.overflow = '' }
   }, [open])
   if (!open) return null
 
-  const close = () => { markOnboarded(); onClose() }
+  const close = () => { markOnboarded(); setOnboardingSkip(dontShow); onClose() }
 
   const Card = ({ p, badge }: { p: Power; badge?: string }) => {
     const Icon = p.icon
@@ -109,20 +119,25 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
 
           {/* 段階的開示の説明 */}
           <div className="mt-4 flex gap-2.5 p-3 rounded-xl bg-surface-secondary">
-            <span className="text-[15px]">🔓</span>
+            <LockOpen size={16} className="text-primary shrink-0 mt-0.5" />
             <div>
               <p className="text-[12px] font-semibold text-text-primary">少しずつ解放されます</p>
               <p className="text-[11px] text-text-secondary leading-relaxed mt-0.5">
-                最初は<b>「まずここだけ」</b>の項目だけ開いています。埋めると次の項目が🔓解放。
+                最初は<b>「まずここだけ」</b>の項目だけ開いています。埋めると次の項目が解放。
                 一度に全部やらなくて大丈夫。1つずつでOKです。
               </p>
             </div>
           </div>
 
-          <button onClick={close} className="w-full py-3 rounded-[10px] text-white text-sm font-semibold mt-4 bg-primary">
+          <label className="flex items-center gap-2 mt-4 cursor-pointer select-none">
+            <input type="checkbox" checked={dontShow} onChange={(e) => setDontShow(e.target.checked)}
+              className="w-4 h-4 accent-[color:var(--color-primary)]" />
+            <span className="text-[12px] text-text-secondary">次回から起動時に自動表示しない</span>
+          </label>
+          <button onClick={close} className="w-full py-3 rounded-[10px] text-white text-sm font-semibold mt-3 bg-primary">
             はじめる
           </button>
-          <p className="text-[10px] text-text-tertiary text-center mt-2">この画面は「データ」タブからいつでも開けます</p>
+          <p className="text-[10px] text-text-tertiary text-center mt-2">この画面は「データ」タブの「?」からいつでも開けます</p>
         </div>
       </div>
     </div>
