@@ -18,14 +18,14 @@ import { FailurePowerHome } from '@/components/growth/FailurePowerHome'
 import { RealizationPowerHome } from '@/components/growth/RealizationPowerHome'
 import { DataHome } from '@/components/data/DataHome'
 import { AppHeader } from '@/components/AppHeader'
+import type { AppTab } from '@/components/AppHeader'
+import { BottomNav } from '@/components/BottomNav'
 import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
 import { OnboardingModal, isOnboarded } from '@/components/OnboardingModal'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
-
-type AppTab = 'growth' | 'discovery' | 'bekkai' | 'realization' | 'failure' | 'data'
 
 function App() {
   const outputs = useGrowthStore((s) => s.outputs)
@@ -101,6 +101,7 @@ function App() {
       {activeTab !== 'data' && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
       <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
 
+      <main className="pb-24">
       {activeTab === 'growth' && (
         <>
           <GrowthHome
@@ -167,6 +168,9 @@ function App() {
       {activeTab === 'failure' && <FailurePowerHome />}
 
       {activeTab === 'data' && <DataHome />}
+      </main>
+
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
     </>
   )
 }
