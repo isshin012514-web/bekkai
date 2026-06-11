@@ -6,6 +6,7 @@ import {
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { SampleControls } from '@/components/SampleControls'
+import { LockGate } from '@/components/LockGate'
 import { SampleHint } from '@/components/SampleHint'
 import { Term } from '@/components/Term'
 import { toast } from '@/stores/toast-store'
@@ -478,8 +479,12 @@ export function RealizationPowerHome() {
 
       <div className="mx-4 mt-4 space-y-3">
         <CombinationSub rp={rp} save={save} />
-        <QuantityQualitySub rp={rp} save={save} />
-        <TeamSub rp={rp} save={save} />
+        {rp.combinations.length > 0
+          ? <QuantityQualitySub rp={rp} save={save} />
+          : <LockGate title="量 → 質" requirement="まず「組み合わせ・連鎖」を1つ書くと解放されます" />}
+        {rp.combinations.length > 0
+          ? <TeamSub rp={rp} save={save} />
+          : <LockGate title="チーム・実行力" requirement="まず「組み合わせ・連鎖」を1つ書くと解放されます" />}
       </div>
     </div>
   )

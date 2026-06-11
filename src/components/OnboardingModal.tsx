@@ -107,7 +107,19 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
           <div className="my-3 text-[11px] text-text-tertiary text-center">— そして、すべての土台 —</div>
           <Card p={GROWTH} badge="エンジン" />
 
-          <button onClick={close} className="w-full py-3 rounded-[10px] text-white text-sm font-semibold mt-5 bg-primary">
+          {/* 段階的開示の説明 */}
+          <div className="mt-4 flex gap-2.5 p-3 rounded-xl bg-surface-secondary">
+            <span className="text-[15px]">🔓</span>
+            <div>
+              <p className="text-[12px] font-semibold text-text-primary">少しずつ解放されます</p>
+              <p className="text-[11px] text-text-secondary leading-relaxed mt-0.5">
+                最初は<b>「まずここだけ」</b>の項目だけ開いています。埋めると次の項目が🔓解放。
+                一度に全部やらなくて大丈夫。1つずつでOKです。
+              </p>
+            </div>
+          </div>
+
+          <button onClick={close} className="w-full py-3 rounded-[10px] text-white text-sm font-semibold mt-4 bg-primary">
             はじめる
           </button>
           <p className="text-[10px] text-text-tertiary text-center mt-2">この画面は「データ」タブからいつでも開けます</p>

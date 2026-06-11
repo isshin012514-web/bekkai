@@ -4,6 +4,7 @@ import { useData } from '../DataContext'
 import { useEntriesStore } from '../stores/entries-store'
 import { SampleControls } from '@/components/SampleControls'
 import { share } from '@/lib/share'
+import { toast } from '@/stores/toast-store'
 
 const GRID_ORDER = [
   { pos: 0, idx: 0 },
@@ -68,6 +69,8 @@ export default function MandalaHome({ onNavigate }) {
   const totalCells = allStats.reduce((s, x) => s + x.total, 0)
   const totalFilled = allStats.reduce((s, x) => s + x.filled, 0)
   const totalEntries = allStats.reduce((s, x) => s + x.count, 0)
+  // 段階的開示：まず「自分」から。埋めると他の視点が解放される
+  const coreFilled = (allStats.find((s) => s.id === 'self')?.count ?? 0) > 0
 
   const shareResult = () => {
     const pct = totalCells > 0 ? Math.round((totalFilled / totalCells) * 100) : 0
@@ -174,21 +177,27 @@ export default function MandalaHome({ onNavigate }) {
           }
           const m = MODULES[idx]
           const st = statFor(m.id)
+          const locked = !coreFilled && m.id !== 'self'
           return (
             <button
               key={m.id}
-              onClick={() => onNavigate({ type: 'module', moduleId: m.id })}
-              className={`animate-pop delay-${pos + 1} tile rounded-[22px] flex flex-col items-center justify-center gap-2 relative`}
+              onClick={() => locked ? toast('🔒「自分」を1つ埋めると解放されます') : onNavigate({ type: 'module', moduleId: m.id })}
+              aria-disabled={locked}
+              className={`animate-pop delay-${pos + 1} tile rounded-[22px] flex flex-col items-center justify-center gap-2 relative ${locked ? 'opacity-45' : ''}`}
               style={{
                 background: 'var(--color-surface)',
                 border: `1px solid color-mix(in srgb, var(--color-${m.color}) 16%, var(--color-border))`,
               }}
             >
-              <span
-                className="absolute -top-7 -right-7 w-20 h-20 rounded-full blur-2xl pointer-events-none"
-                style={{ background: `var(--color-${m.color})`, opacity: 0.16 }}
-              />
-              {st.filled > 0 && (
+              {!locked && (
+                <span
+                  className="absolute -top-7 -right-7 w-20 h-20 rounded-full blur-2xl pointer-events-none"
+                  style={{ background: `var(--color-${m.color})`, opacity: 0.16 }}
+                />
+              )}
+              {locked ? (
+                <span className="absolute top-2 right-2 text-[11px] z-10 leading-none">🔒</span>
+              ) : st.filled > 0 && (
                 <span
                   className="absolute top-2 right-2 min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center text-[8px] font-bold text-white z-10 mono"
                   style={{ background: `var(--color-${m.color})` }}
@@ -199,7 +208,7 @@ export default function MandalaHome({ onNavigate }) {
               <Icon name={m.id} size={23} className="relative z-10" style={{ color: `var(--color-${m.color})` }} />
               <div className="relative z-10 text-center">
                 <div className="text-[12px] font-semibold text-text leading-none">{m.name}</div>
-                <div className="text-[8px] text-text-muted mt-1">{m.sub}</div>
+                <div className="text-[8px] text-text-muted mt-1">{locked ? '🔒 自分を埋めると解放' : m.sub}</div>
               </div>
             </button>
           )

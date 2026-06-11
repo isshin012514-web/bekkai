@@ -9,6 +9,7 @@ import { UpcomingPeopleSection } from './UpcomingPeopleSection'
 import { NextActionPlanSection } from './NextActionPlanSection'
 import { useGrowthStore } from '@/stores/growth-store'
 import { SampleControls } from '@/components/SampleControls'
+import { LockGate } from '@/components/LockGate'
 
 interface GrowthHomeProps {
   onAddOutput: () => void
@@ -47,6 +48,7 @@ export function GrowthHome({
     }, 50)
   }
 
+  const hasRecord = outputs.length > 0 || inputs.length > 0
   const metPeople = upcomingPeople.filter((p) => p.met)
   const totalQuestions = upcomingPeople.reduce((sum, p) => sum + p.questions.length, 0)
 
@@ -58,18 +60,26 @@ export function GrowthHome({
       <GrowthCycleSection />
       <NextActionPlanSection sectionRef={nextActionRef} />
       <RecordsSection inputs={inputs} outputs={outputs} onSelectOutput={onSelectOutput} onOutputFromInput={onOutputFromInput} onRequestReview={onRequestReview} />
-      <RoleModelsSection
-        roleModels={roleModels}
-        onSelect={onSelectRoleModel}
-        onAdd={onAddRoleModel}
-      />
-      <UpcomingPeopleSection
-        people={upcomingPeople}
-        metCount={metPeople.length}
-        totalQuestions={totalQuestions}
-        onSelect={onSelectPerson}
-        onAdd={onAddPerson}
-      />
+      {hasRecord ? (
+        <>
+          <RoleModelsSection
+            roleModels={roleModels}
+            onSelect={onSelectRoleModel}
+            onAdd={onAddRoleModel}
+          />
+          <UpcomingPeopleSection
+            people={upcomingPeople}
+            metCount={metPeople.length}
+            totalQuestions={totalQuestions}
+            onSelect={onSelectPerson}
+            onAdd={onAddPerson}
+          />
+        </>
+      ) : (
+        <div className="mx-4 mt-4">
+          <LockGate title="ロールモデル・会いたい人" requirement="まずインプットかアウトプットを1つ記録すると解放されます" />
+        </div>
+      )}
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { useGrowthStore } from '@/stores/growth-store'
 import { SampleControls } from '@/components/SampleControls'
 import { SampleHint } from '@/components/SampleHint'
 import { Term } from '@/components/Term'
+import { LockGate } from '@/components/LockGate'
 import { toast } from '@/stores/toast-store'
 import { generateId, nowISO } from '@/lib/utils'
 import { emptyFailurePower, RISK_LEVEL_LABELS, J_CURVE_LABELS, RETREAT_DECISION_LABELS } from '@/lib/types'
@@ -136,6 +137,8 @@ interface CrudConfig<T extends { id: string; created_at: string }, F> {
   emptyText?: string
   filter?: { label: string; pred: (item: T) => boolean }
   suggest?: { label: string; make: () => F }
+  locked?: boolean
+  lockRequirement?: string
 }
 
 function CrudSection<T extends { id: string; created_at: string }, F>(cfg: CrudConfig<T, F>) {
@@ -156,6 +159,10 @@ function CrudSection<T extends { id: string; created_at: string }, F>(cfg: CrudC
   const update = (id: string, patch: Partial<T>) => onChange(items.map((i) => (i.id === id ? { ...i, ...patch } : i)))
 
   const shown = filterOn && cfg.filter ? items.filter(cfg.filter.pred) : items
+
+  if (cfg.locked) {
+    return <LockGate title={cfg.title} requirement={cfg.lockRequirement ?? '前のステップを埋めると解放されます'} />
+  }
 
   return (
     <section className="border border-border-card rounded-lg overflow-hidden">
@@ -362,6 +369,7 @@ export function FailurePowerHome() {
         {/* ③ リスク設計 */}
         <CrudSection<RiskDesign, FRisk>
           icon={<BarChart3 size={14} />} title="リスク設計" sub="リスク×リターンを先に置く"
+          locked={fp.failureList.length === 0} lockRequirement="まず「失敗リスト」を1つ記録すると解放されます"
           note="ローリスク・ミドルリターン / ミドルリスク・ハイリターンを狙う。緑が推奨ゾーン。"
           topContent={<RiskMatrix items={fp.riskDesigns} />}
           items={fp.riskDesigns} onChange={(next) => save({ riskDesigns: next })}
@@ -444,6 +452,7 @@ export function FailurePowerHome() {
         {/* ⑤ 撤退ジャッジ */}
         <CrudSection<RetreatJudgment, FRetreat>
           icon={<CornerUpLeft size={14} />} title="撤退ジャッジ" sub="Jカーブで続行/撤退を判断"
+          locked={fp.failureList.length === 0} lockRequirement="まず「失敗リスト」を1つ記録すると解放されます"
           note={<><Term def="投資しても一度後退し、ある点から急に正へ転じる成長曲線。今が「谷」か「回復」かで判断が変わる。">Jカーブ</Term>のどこにいるか、撤退理由を説明できるか、誰に迷惑がかかるか。逆算して判断する。</>}
           items={fp.retreatJudgments} onChange={(next) => save({ retreatJudgments: next })}
           addLabel="判断を追加" saveLabel="記録する"
@@ -513,6 +522,7 @@ export function FailurePowerHome() {
         {/* ⑥ メタ認知 */}
         <CrudSection<Metacognition, FMeta>
           icon={<Target size={14} />} title="メタ認知" sub="優れた人との差分を見る"
+          locked={fp.failureList.length === 0} lockRequirement="まず「失敗リスト」を1つ記録すると解放されます"
           note={<><Term def="自分の思考や判断を一段上から客観的に眺めること。人は自分に甘いので、第三者の視点で見直すと盲点に気づける。">メタ認知</Term>＝人は自分に甘い。周囲の優れた人になったつもりで、自分の意思決定を第三者視点で評価する。</>}
           items={fp.metacognitions} onChange={(next) => save({ metacognitions: next })}
           addLabel="振り返りを追加" saveLabel="記録する"
