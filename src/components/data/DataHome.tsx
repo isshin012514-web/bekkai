@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { Download, Upload, Check, AlertTriangle, Sparkles, Copy, Database } from 'lucide-react'
 import { exportAll, importAll, buildAIPrompt } from '@/lib/data-bundle'
+import { CloudSyncSection } from './CloudSyncSection'
 
 export function DataHome() {
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -67,6 +68,9 @@ export function DataHome() {
 
   return (
     <div className="pb-6">
+      {/* クラウド同期 */}
+      <CloudSyncSection />
+
       {/* Backup / Restore */}
       <section className="mx-4 mt-4 border border-border-card rounded-lg p-4">
         <div className="flex items-center gap-2 mb-1">
