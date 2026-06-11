@@ -1,14 +1,11 @@
-import { useMemo, useRef } from 'react'
+import { useRef } from 'react'
 import type { Output, RoleModel, UpcomingPerson } from '@/lib/types'
-import { peerScoredCount } from '@/lib/utils'
-import { WeeklySummary } from './WeeklySummary'
 import { WeeklyGoalsDisplay } from './WeeklyGoalsDisplay'
 import { TodayActions } from './TodayActions'
 import { GrowthCycleSection } from './GrowthCycleSection'
 import { RecordsSection } from './RecordsSection'
 import { RoleModelsSection } from './RoleModelsSection'
 import { UpcomingPeopleSection } from './UpcomingPeopleSection'
-import { WeeklyReviewButton } from './WeeklyReviewButton'
 import { NextActionPlanSection } from './NextActionPlanSection'
 import { useGrowthStore } from '@/stores/growth-store'
 import { SampleControls } from '@/components/SampleControls'
@@ -24,7 +21,6 @@ interface GrowthHomeProps {
   onSelectPerson: (person: UpcomingPerson) => void
   onAddPerson: () => void
   onAddInput: () => void
-  onWeeklyReview: () => void
   onOutputFromInput: (inputId: string) => void
   onNextActionPlan?: () => void
 }
@@ -40,7 +36,6 @@ export function GrowthHome({
   onSelectPerson,
   onAddPerson,
   onAddInput,
-  onWeeklyReview,
   onOutputFromInput,
 }: GrowthHomeProps) {
   const { outputs, roleModels, upcomingPeople, inputs } = useGrowthStore()
@@ -52,21 +47,12 @@ export function GrowthHome({
     }, 50)
   }
 
-  const selfScoredTotal = useMemo(() => outputs.filter((o) => o.self_score > 0).length, [outputs])
-  const peerCount = useMemo(() => peerScoredCount(outputs), [outputs])
-
   const metPeople = upcomingPeople.filter((p) => p.met)
   const totalQuestions = upcomingPeople.reduce((sum, p) => sum + p.questions.length, 0)
 
   return (
     <div className="pb-6">
       <SampleControls feature="growth" accent="#185FA5" />
-      <WeeklySummary
-        inputCount={inputs.length}
-        outputCount={outputs.length}
-        selfScoredCount={selfScoredTotal}
-        peerScoredCount={peerCount}
-      />
       <WeeklyGoalsDisplay />
       <TodayActions onAddOutput={onAddOutput} onAddInput={onAddInput} onSelfScore={onSelfScore} onEnterFeedback={onEnterFeedback} onNextActionPlan={handleNextActionPlan} />
       <GrowthCycleSection />
@@ -84,7 +70,6 @@ export function GrowthHome({
         onSelect={onSelectPerson}
         onAdd={onAddPerson}
       />
-      <WeeklyReviewButton onPress={onWeeklyReview} />
     </div>
   )
 }

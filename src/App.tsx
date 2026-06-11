@@ -8,7 +8,6 @@ import { AddRoleModelModal } from '@/components/growth/AddRoleModelModal'
 import { RoleModelDetailModal } from '@/components/growth/RoleModelDetailModal'
 import { QuestionsModal } from '@/components/growth/QuestionsModal'
 import { FeedbackModal } from '@/components/growth/FeedbackModal'
-import { WeeklyReviewModal } from '@/components/growth/WeeklyReviewModal'
 import { AddInputModal } from '@/components/growth/AddInputModal'
 import { AddUpcomingPersonModal } from '@/components/growth/AddUpcomingPersonModal'
 import { SelfScoreModal } from '@/components/growth/SelfScoreModal'
@@ -16,6 +15,7 @@ import { DiscoveryWrapper } from '@/discovery/DiscoveryWrapper'
 import { BekkaiHome } from '@/components/bekkai/BekkaiHome'
 import { FailurePowerHome } from '@/components/growth/FailurePowerHome'
 import { RealizationPowerHome } from '@/components/growth/RealizationPowerHome'
+import { GrowthDashboard } from '@/components/growth/GrowthDashboard'
 import { DataHome } from '@/components/data/DataHome'
 import { AppHeader } from '@/components/AppHeader'
 import type { AppTab } from '@/components/AppHeader'
@@ -76,7 +76,6 @@ function App() {
   const [addRoleModelOpen, setAddRoleModelOpen] = useState(false)
   const [selectedRoleModel, setSelectedRoleModel] = useState<RoleModel | null>(null)
   const [selectedPerson, setSelectedPerson] = useState<UpcomingPerson | null>(null)
-  const [weeklyReviewOpen, setWeeklyReviewOpen] = useState(false)
   const [addInputOpen, setAddInputOpen] = useState(false)
   const [addPersonOpen, setAddPersonOpen] = useState(false)
   const [selfScoreOpen, setSelfScoreOpen] = useState(false)
@@ -97,8 +96,8 @@ function App() {
 
   return (
     <>
-      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={activeTab === 'data' ? () => setOnboardingOpen(true) : () => setGuideOpen(true)} />
-      {activeTab !== 'data' && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
+      <AppHeader activeTab={activeTab} onTabChange={handleTabChange} onHelp={activeTab === 'data' || activeTab === 'dashboard' ? () => setOnboardingOpen(true) : () => setGuideOpen(true)} />
+      {activeTab !== 'data' && activeTab !== 'dashboard' && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
       <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
 
       <main className="pb-24">
@@ -115,7 +114,6 @@ function App() {
             onSelectPerson={(p) => setSelectedPerson(p)}
             onAddPerson={() => setAddPersonOpen(true)}
             onAddInput={() => setAddInputOpen(true)}
-            onWeeklyReview={() => setWeeklyReviewOpen(true)}
             onOutputFromInput={handleOutputFromInput}
           />
 
@@ -152,7 +150,6 @@ function App() {
             onClose={() => setSelectedPerson(null)}
             person={freshSelectedPerson}
           />
-          <WeeklyReviewModal open={weeklyReviewOpen} onClose={() => setWeeklyReviewOpen(false)} />
           <AddInputModal open={addInputOpen} onClose={() => setAddInputOpen(false)} />
           <AddUpcomingPersonModal open={addPersonOpen} onClose={() => setAddPersonOpen(false)} />
           <SelfScoreModal open={selfScoreOpen} onClose={() => setSelfScoreOpen(false)} />
@@ -166,6 +163,8 @@ function App() {
       {activeTab === 'realization' && <RealizationPowerHome />}
 
       {activeTab === 'failure' && <FailurePowerHome />}
+
+      {activeTab === 'dashboard' && <GrowthDashboard />}
 
       {activeTab === 'data' && <DataHome />}
       </main>
