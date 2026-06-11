@@ -1,5 +1,7 @@
-import { Cloud, CloudOff, RefreshCw, UploadCloud, DownloadCloud, LogOut, Check, AlertTriangle } from 'lucide-react'
+import { useState } from 'react'
+import { Cloud, CloudOff, RefreshCw, UploadCloud, DownloadCloud, LogOut, Check, AlertTriangle, Mail } from 'lucide-react'
 import { useCloudSync } from '@/lib/use-cloud-sync'
+import type { CloudSync } from '@/lib/use-cloud-sync'
 
 function formatTime(ms: number): string {
   if (!ms) return '—'
@@ -48,17 +50,7 @@ export function CloudSyncSection() {
       {!cs.ready ? (
         <p className="text-[11px] text-text-tertiary">読み込み中…</p>
       ) : !cs.user ? (
-        <>
-          <p className="text-[11px] text-text-secondary leading-relaxed mb-3">
-            Googleでログインすると、別の端末ともデータが自動で同期されます。データは自分のアカウントだけが読み書きできます。
-          </p>
-          <button
-            type="button" onClick={cs.signIn} disabled={cs.busy}
-            className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium border border-border-card bg-surface hover:bg-surface-secondary transition-colors disabled:opacity-50"
-          >
-            <GoogleMark />Googleでログイン
-          </button>
-        </>
+        <EmailAuthForm cs={cs} />
       ) : (
         <>
           <div className="flex items-center gap-2 mb-3 bg-surface-secondary rounded-lg px-3 py-2">
@@ -112,13 +104,67 @@ export function CloudSyncSection() {
   )
 }
 
-function GoogleMark() {
+function EmailAuthForm({ cs }: { cs: CloudSync }) {
+  const [mode, setMode] = useState<'login' | 'signup'>('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [notice, setNotice] = useState<string | null>(null)
+
+  const inputCls = 'w-full text-[13px] bg-surface border border-border-card rounded-lg px-3 py-2.5 placeholder:text-text-tertiary focus:outline-none focus:border-primary'
+
+  const submit = async () => {
+    setNotice(null)
+    if (!email.trim() || !password) return
+    const ok = mode === 'login' ? await cs.signInEmail(email, password) : await cs.signUpEmail(email, password)
+    if (ok) { setPassword('') }
+  }
+
+  const forgot = async () => {
+    setNotice(null)
+    if (!email.trim()) { setNotice('先にメールアドレスを入力してください'); return }
+    const ok = await cs.resetPw(email)
+    if (ok) setNotice('パスワード再設定メールを送信しました')
+  }
+
   return (
-    <svg width="15" height="15" viewBox="0 0 48 48" aria-hidden>
-      <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z" />
-      <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 18.9 12 24 12c3.1 0 5.8 1.1 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
-      <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.5-4.6 2.4-7.2 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.2 44 24 44z" />
-      <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C41 36.2 44 30.6 44 24c0-1.3-.1-2.3-.4-3.5z" />
-    </svg>
+    <div>
+      <p className="text-[11px] text-text-secondary leading-relaxed mb-3">
+        メールアドレスとパスワードで{mode === 'login' ? 'ログイン' : '新規登録'}すると、別の端末ともデータが自動で同期されます。データは自分のアカウントだけが読み書きできます。
+      </p>
+
+      {/* ログイン / 新規登録 切替 */}
+      <div className="flex gap-1 p-0.5 bg-surface-secondary rounded-lg border border-border-card mb-2.5">
+        {(['login', 'signup'] as const).map((m) => (
+          <button key={m} type="button" onClick={() => { setMode(m); setNotice(null) }}
+            className={`flex-1 text-[12px] py-1.5 rounded-md transition-colors ${mode === m ? 'bg-primary text-white font-medium' : 'text-text-secondary'}`}>
+            {m === 'login' ? 'ログイン' : '新規登録'}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        <input type="email" inputMode="email" autoComplete="email" className={inputCls}
+          placeholder="メールアドレス" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} className={inputCls}
+          placeholder={mode === 'login' ? 'パスワード' : 'パスワード（6文字以上）'} value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') submit() }} />
+      </div>
+
+      {cs.error && <p className="text-[11px] text-fail-danger mt-2">{cs.error}</p>}
+      {notice && <p className="text-[11px] text-done mt-2">{notice}</p>}
+
+      <button type="button" onClick={submit} disabled={cs.busy || !email.trim() || !password}
+        className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-white bg-primary mt-3 disabled:opacity-50">
+        <Mail size={15} />{mode === 'login' ? 'ログイン' : '登録して同期を始める'}
+      </button>
+
+      {mode === 'login' && (
+        <button type="button" onClick={forgot} disabled={cs.busy}
+          className="w-full text-[11px] text-text-tertiary mt-2 hover:text-text-secondary">
+          パスワードを忘れた場合
+        </button>
+      )}
+    </div>
   )
 }

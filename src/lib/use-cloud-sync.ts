@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import {
-  isFirebaseConfigured, onAuth, signInWithGoogle, signOutUser, type User,
+  isFirebaseConfigured, onAuth, signInWithEmail, signUpWithEmail, resetPassword,
+  signOutUser, authErrorMessage, type User,
 } from '@/lib/firebase'
 import {
   initialSync, startAutoSync, pushBundle, pullBundle,
@@ -18,7 +19,9 @@ export interface CloudSync {
   conflict: boolean
   busy: boolean
   error: string | null
-  signIn: () => Promise<void>
+  signInEmail: (email: string, password: string) => Promise<boolean>
+  signUpEmail: (email: string, password: string) => Promise<boolean>
+  resetPw: (email: string) => Promise<boolean>
   signOutNow: () => Promise<void>
   pushNow: () => Promise<void>
   pullNow: () => Promise<void>
@@ -65,9 +68,22 @@ export function useCloudSync(): CloudSync {
     return () => { unsub(); stopAutoRef.current?.(); stopAutoRef.current = null }
   }, [configured, beginAuto])
 
-  const signIn = useCallback(async () => {
+  const signInEmail = useCallback(async (email: string, password: string) => {
     setBusy(true); setError(null)
-    try { await signInWithGoogle() } catch (e) { setError(e instanceof Error ? e.message : 'ログインに失敗しました') } finally { setBusy(false) }
+    try { await signInWithEmail(email, password); return true }
+    catch (e) { setError(authErrorMessage(e)); return false } finally { setBusy(false) }
+  }, [])
+
+  const signUpEmail = useCallback(async (email: string, password: string) => {
+    setBusy(true); setError(null)
+    try { await signUpWithEmail(email, password); return true }
+    catch (e) { setError(authErrorMessage(e)); return false } finally { setBusy(false) }
+  }, [])
+
+  const resetPw = useCallback(async (email: string) => {
+    setBusy(true); setError(null)
+    try { await resetPassword(email); return true }
+    catch (e) { setError(authErrorMessage(e)); return false } finally { setBusy(false) }
   }, [])
 
   const signOutNow = useCallback(async () => {
@@ -106,6 +122,6 @@ export function useCloudSync(): CloudSync {
 
   return {
     configured, ready, user, status, lastSync, conflict, busy, error,
-    signIn, signOutNow, pushNow, pullNow, resolveRemote, resolveLocal,
+    signInEmail, signUpEmail, resetPw, signOutNow, pushNow, pullNow, resolveRemote, resolveLocal,
   }
 }

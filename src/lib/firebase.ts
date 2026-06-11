@@ -1,7 +1,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
 import {
-  getAuth, GoogleAuthProvider, signInWithPopup, signOut,
-  onAuthStateChanged, type Auth, type User,
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendPasswordResetEmail, signOut, onAuthStateChanged, type Auth, type User,
 } from 'firebase/auth'
 import { getFirestore, type Firestore } from 'firebase/firestore'
 
@@ -35,10 +35,38 @@ export function getDb(): Firestore {
   return ensure().db
 }
 
-export function signInWithGoogle(): Promise<User> {
+export function signInWithEmail(email: string, password: string): Promise<User> {
   const { auth } = ensure()
-  const provider = new GoogleAuthProvider()
-  return signInWithPopup(auth, provider).then((r) => r.user)
+  return signInWithEmailAndPassword(auth, email.trim(), password).then((r) => r.user)
+}
+
+export function signUpWithEmail(email: string, password: string): Promise<User> {
+  const { auth } = ensure()
+  return createUserWithEmailAndPassword(auth, email.trim(), password).then((r) => r.user)
+}
+
+export function resetPassword(email: string): Promise<void> {
+  const { auth } = ensure()
+  return sendPasswordResetEmail(auth, email.trim())
+}
+
+/** Firebase Auth のエラーコードを日本語メッセージに変換 */
+export function authErrorMessage(e: unknown): string {
+  const code = e && typeof e === 'object' && 'code' in e ? String((e as { code: unknown }).code) : ''
+  switch (code) {
+    case 'auth/invalid-email': return 'メールアドレスの形式が正しくありません'
+    case 'auth/missing-password': return 'パスワードを入力してください'
+    case 'auth/weak-password': return 'パスワードは6文字以上にしてください'
+    case 'auth/email-already-in-use': return 'このメールは既に登録済みです。ログインしてください'
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found': return 'メールアドレスまたはパスワードが違います'
+    case 'auth/too-many-requests': return '試行回数が多すぎます。しばらくしてからお試しください'
+    case 'auth/network-request-failed': return 'ネットワークエラーです。接続を確認してください'
+    case 'auth/operation-not-allowed':
+    case 'auth/configuration-not-found': return 'メール/パスワード認証が未有効です。Firebaseコンソール → Authentication → Sign-in method で「メール/パスワード」を有効化してください'
+    default: return e instanceof Error ? e.message : '認証に失敗しました'
+  }
 }
 
 export function signOutUser(): Promise<void> {
