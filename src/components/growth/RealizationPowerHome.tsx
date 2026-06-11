@@ -426,11 +426,10 @@ export function RealizationPowerHome() {
 
   const rp = realizationPower
   const save = (next: Partial<RealizationPower>) => setRealizationPower({ ...rp, ...next })
-  const hasData = rp.combinations.length > 0 || rp.quantityQualities.length > 0 || rp.team.length > 0 || rp.confidence.trim().length > 0
 
   return (
     <div className="pb-6">
-      <SampleControls feature="realization" hasData={hasData} accent="#EA580C" />
+      <SampleControls feature="realization" accent="#EA580C" />
       <div className="mx-4 mt-4 bg-real-bg rounded-lg px-4 py-3">
         <p className="text-[11px] text-real leading-relaxed">
           <Rocket size={12} className="inline mr-1" />

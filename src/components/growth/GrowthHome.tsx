@@ -58,11 +58,9 @@ export function GrowthHome({
   const metPeople = upcomingPeople.filter((p) => p.met)
   const totalQuestions = upcomingPeople.reduce((sum, p) => sum + p.questions.length, 0)
 
-  const hasData = outputs.length > 0 || inputs.length > 0 || roleModels.length > 0 || upcomingPeople.length > 0
-
   return (
     <div className="pb-6">
-      <SampleControls feature="growth" hasData={hasData} accent="#185FA5" />
+      <SampleControls feature="growth" accent="#185FA5" />
       <WeeklySummary
         inputCount={inputs.length}
         outputCount={outputs.length}

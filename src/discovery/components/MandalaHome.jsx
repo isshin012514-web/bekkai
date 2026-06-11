@@ -71,7 +71,7 @@ export default function MandalaHome({ onNavigate }) {
   return (
     <div className="py-5 space-y-5">
       <div className="-mx-1">
-        <SampleControls feature="discovery" hasData={totalEntries > 0} accent="#7c6cff" />
+        <SampleControls feature="discovery" accent="#7c6cff" />
       </div>
       <div className="space-y-1">
         <h1 className="text-[17px] font-semibold text-text leading-tight">8つの視点で深掘る</h1>

@@ -53,13 +53,8 @@ interface GrowthState extends GrowthData {
 
   markWeeklyReportViewed: () => void
 
-  seedData: (data: {
-    outputs: Output[]
-    reviewers: Reviewer[]
-    roleModels: RoleModel[]
-    upcomingPeople: UpcomingPerson[]
-    inputs: Input[]
-  }) => void
+  seedData: (data: Partial<Pick<GrowthData,
+    'outputs' | 'reviewers' | 'roleModels' | 'upcomingPeople' | 'inputs' | 'weeklyGoals' | 'actionPlans'>>) => void
 
   exportData: () => GrowthData
   importData: (data: Partial<GrowthData>) => void

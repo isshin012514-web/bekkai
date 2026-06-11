@@ -15,6 +15,7 @@ function formatTime(ms: number): string {
 
 export function CloudSyncSection() {
   const cs = useCloudSync()
+  const [resolving, setResolving] = useState(false)
 
   // 未設定：開発者向けの控えめな案内のみ
   if (!cs.configured) {
@@ -70,10 +71,16 @@ export function CloudSyncSection() {
                 クラウドにもこの端末にもデータがあります。どちらを残しますか？（もう一方は上書きされます）
               </p>
               <div className="flex gap-2">
-                <button type="button" onClick={cs.resolveRemote} disabled={cs.busy}
-                  className="flex-1 py-2 rounded-lg text-[12px] bg-primary text-white font-medium disabled:opacity-50">クラウドを使う</button>
-                <button type="button" onClick={cs.resolveLocal} disabled={cs.busy}
-                  className="flex-1 py-2 rounded-lg text-[12px] border border-border-card text-text-secondary disabled:opacity-50">この端末を使う</button>
+                <button type="button" disabled={resolving}
+                  onClick={async () => { setResolving(true); try { await cs.resolveRemote() } finally { setResolving(false) } }}
+                  className="flex-1 py-2 rounded-lg text-[12px] bg-primary text-white font-medium disabled:opacity-50">
+                  {resolving ? '処理中…' : 'クラウドを使う'}
+                </button>
+                <button type="button" disabled={resolving}
+                  onClick={async () => { setResolving(true); try { await cs.resolveLocal() } finally { setResolving(false) } }}
+                  className="flex-1 py-2 rounded-lg text-[12px] border border-border-card text-text-secondary disabled:opacity-50">
+                  この端末を使う
+                </button>
               </div>
             </div>
           ) : (

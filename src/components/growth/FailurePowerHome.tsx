@@ -257,11 +257,10 @@ export function FailurePowerHome() {
   const setFailurePower = useGrowthStore((s) => s.setFailurePower)
   const fp = failurePower
   const save = (next: Partial<FailurePower>) => setFailurePower({ ...fp, ...next })
-  const hasData = Object.values(fp).some((v) => Array.isArray(v) && v.length > 0)
 
   return (
     <div className="pb-6">
-      <SampleControls feature="failure" hasData={hasData} accent="#0D9488" />
+      <SampleControls feature="failure" accent="#0D9488" />
       {/* イントロ + 成長サイクル内の位置づけ */}
       <div className="mx-4 mt-4 bg-fail-bg rounded-lg px-4 py-3">
         <p className="text-[11px] text-fail leading-relaxed">

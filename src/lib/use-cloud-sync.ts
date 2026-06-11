@@ -7,6 +7,7 @@ import {
   initialSync, startAutoSync, pushBundle, pullBundle,
   resolveUseRemote, resolveUseLocal, getLastSync, clearLastSync,
 } from '@/lib/cloud-sync'
+import { useSampleView, isAnySampleMode } from '@/stores/sample-view-store'
 
 export type SyncStatus = 'signed-out' | 'syncing' | 'synced' | 'error'
 
@@ -55,6 +56,8 @@ export function useCloudSync(): CloudSync {
       stopAutoRef.current?.()
       stopAutoRef.current = null
       if (!u) { setStatus('signed-out'); return }
+      // サインイン時はサンプル表示を解除し、実データで同期する
+      useSampleView.getState().exitAll()
       setStatus('syncing')
       try {
         const r = await initialSync(u.uid)
@@ -94,6 +97,7 @@ export function useCloudSync(): CloudSync {
 
   const pushNow = useCallback(async () => {
     if (!user) return
+    if (isAnySampleMode()) { setError('サンプル表示中は同期できません。各タブで「Myデータ」に戻してください'); return }
     setBusy(true); setStatus('syncing'); setError(null)
     try { await pushBundle(user.uid); refreshLast(); setStatus('synced') }
     catch (e) { setStatus('error'); setError(e instanceof Error ? e.message : 'アップロードに失敗しました') } finally { setBusy(false) }
@@ -101,6 +105,7 @@ export function useCloudSync(): CloudSync {
 
   const pullNow = useCallback(async () => {
     if (!user) return
+    if (isAnySampleMode()) { setError('サンプル表示中は同期できません。各タブで「Myデータ」に戻してください'); return }
     setBusy(true); setStatus('syncing'); setError(null)
     try { await pullBundle(user.uid); refreshLast(); setStatus('synced') }
     catch (e) { setStatus('error'); setError(e instanceof Error ? e.message : '取得に失敗しました') } finally { setBusy(false) }

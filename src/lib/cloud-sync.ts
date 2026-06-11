@@ -4,6 +4,7 @@ import { exportAll, importAll } from '@/lib/data-bundle'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
+import { isAnySampleMode } from '@/stores/sample-view-store'
 
 const LAST_SYNC_KEY = 'cloud-last-sync-ms'
 
@@ -93,6 +94,7 @@ export function startAutoSync(uid: string, onStatus: (s: 'syncing' | 'synced' | 
   let timer: ReturnType<typeof setTimeout> | undefined
   const trigger = () => {
     if (applyingRemote) return
+    if (isAnySampleMode()) return // サンプル表示中はクラウドに上げない
     if (timer) clearTimeout(timer)
     timer = setTimeout(async () => {
       onStatus('syncing')
