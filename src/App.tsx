@@ -104,7 +104,7 @@ function App() {
       {!NON_GUIDE.includes(activeTab) && <FeatureGuide feature={activeTab as GuideFeature} open={guideOpen} onClose={closeGuide} />}
       <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
 
-      <main className="pb-28">
+      <main style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 108px)' }}>
       {activeTab === 'home' && <HomeScreen onNavigate={handleTabChange} />}
 
       {activeTab === 'about' && <AboutScreen onStart={() => handleTabChange('home')} onBack={() => handleTabChange('home')} />}

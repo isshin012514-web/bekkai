@@ -24,9 +24,13 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 border-t border-border-card bg-surface shadow-[0_-1px_10px_rgba(0,0,0,0.05)]"
-      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 10px)' }}
+      style={{
+        paddingBottom: 'max(env(safe-area-inset-bottom), 12px)',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+      }}
     >
-      <div className="flex items-stretch max-w-[480px] mx-auto px-2 pt-2 pb-1">
+      <div className="flex items-stretch max-w-[480px] mx-auto px-3 pt-2 pb-1.5">
         {FORCES.map(({ key, label, Icon, color }) => {
           const on = activeTab === key
           return (

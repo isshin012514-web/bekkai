@@ -106,42 +106,43 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       </button>
 
       {/* 5つの力 */}
-      <p className="mx-4 mt-5 mb-2 text-[12px] font-medium text-text-secondary">5つの力</p>
-      <div className="mx-4 grid grid-cols-2 gap-2.5">
+      <p className="mx-4 mt-5 mb-2.5 text-[13px] font-semibold text-text-secondary">5つの力</p>
+      <div className="mx-4 grid grid-cols-2 gap-3">
         {forces.map((f) => (
           <button
             key={f.key}
             onClick={() => onNavigate(f.key)}
-            className="text-left border border-border-card rounded-xl p-3 hover:bg-surface-secondary transition-colors active:scale-[0.98]"
+            className="text-left border border-border-card rounded-2xl p-4 min-h-[128px] flex flex-col hover:bg-surface-secondary transition-colors active:scale-[0.98]"
+            style={{ borderColor: `${f.color}33` }}
           >
             <div className="flex items-center justify-between">
-              <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${f.color}1A` }}>
-                <f.Icon size={18} style={{ color: f.color }} />
+              <span className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${f.color}1A` }}>
+                <f.Icon size={24} style={{ color: f.color }} />
               </span>
-              <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${f.color}14`, color: f.color }}>{f.badge}</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${f.color}14`, color: f.color }}>{f.badge}</span>
             </div>
-            <div className="flex items-baseline gap-1.5 mt-2">
-              <p className="text-[13px] font-semibold" style={{ color: f.color }}>{f.label}</p>
-              {f.count > 0 && <span className="text-[10px] text-text-tertiary">{f.count}件</span>}
+            <div className="flex items-baseline gap-2 mt-3">
+              <p className="text-[17px] font-bold" style={{ color: f.color }}>{f.label}</p>
+              {f.count > 0 && <span className="text-[11px] text-text-tertiary">{f.count}件</span>}
             </div>
-            <p className="text-[10px] text-text-tertiary leading-tight mt-0.5">{f.sub}</p>
+            <p className="text-[11px] text-text-tertiary leading-snug mt-0.5">{f.sub}</p>
           </button>
         ))}
 
         {/* 成長の可視化（ダッシュボード）カード */}
         <button
           onClick={() => onNavigate('dashboard')}
-          className="text-left border border-border-card rounded-xl p-3 hover:bg-surface-secondary transition-colors active:scale-[0.98] flex flex-col justify-between"
+          className="text-left border border-border-card rounded-2xl p-4 min-h-[128px] hover:bg-surface-secondary transition-colors active:scale-[0.98] flex flex-col justify-between"
         >
           <div className="flex items-center justify-between">
-            <span className="w-9 h-9 rounded-lg flex items-center justify-center bg-primary-bg">
-              <LineChart size={18} className="text-primary" />
+            <span className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary-bg">
+              <LineChart size={24} className="text-primary" />
             </span>
-            <ChevronRight size={16} className="text-text-tertiary" />
+            <ChevronRight size={18} className="text-text-tertiary" />
           </div>
           <div>
-            <p className="text-[13px] font-semibold mt-2 text-primary">成長の可視化</p>
-            <p className="text-[10px] text-text-tertiary leading-tight mt-0.5">サマリー・週次レポート</p>
+            <p className="text-[17px] font-bold mt-3 text-primary">成長の可視化</p>
+            <p className="text-[11px] text-text-tertiary leading-snug mt-0.5">サマリー・週次レポート</p>
           </div>
         </button>
       </div>
