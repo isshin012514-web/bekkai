@@ -6,30 +6,38 @@ import { currentStreak } from '@/lib/daily'
 import { earnedBadges, BADGES } from '@/lib/badges'
 import { celebrate } from '@/stores/celebrate-store'
 import { toast } from '@/stores/toast-store'
+import { useSampleView, getRealData } from '@/stores/sample-view-store'
 
 const SEEN_KEY = 'earned-badges'
 
 export function Badges() {
-  const { outputs, inputs, failurePower, realizationPower } = useGrowthStore()
+  // 再描画トリガー用の購読（値は称号計算には使わず、実データで計算）
+  const g = useGrowthStore()
   const bekkais = useBekkaiStore((s) => s.bekkais)
   const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
+  const modes = useSampleView((s) => s.modes)
 
   const ctx = useMemo(() => {
-    const discovery = Object.values(entries ?? {}).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0)
-    const failure = failurePower ? Object.values(failurePower).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
-    const realization = realizationPower ? realizationPower.combinations.length + realizationPower.quantityQualities.length + realizationPower.team.length : 0
-    const realizationDone = realizationPower ? realizationPower.combinations.filter((c) => c.status === 'succeeded').length : 0
+    const real = getRealData()
+    const rOut = (real.growthCore.outputs ?? []) as { created_at: string }[]
+    const rIn = (real.growthCore.inputs ?? []) as { created_at: string }[]
+    const rBek = (real.bekkais ?? []) as { created_at?: string; conclusion?: string }[]
+    const rRP = real.realizationPower
+    const discovery = Object.values(real.entries ?? {}).reduce((s: number, v) => s + (Array.isArray(v) ? v.length : 0), 0)
+    const failure = real.failurePower ? Object.values(real.failurePower).reduce((s: number, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
+    const realization = rRP ? (rRP.combinations?.length ?? 0) + (rRP.quantityQualities?.length ?? 0) + (rRP.team?.length ?? 0) : 0
+    const realizationDone = rRP ? (rRP.combinations as { status?: string }[] ?? []).filter((c) => c.status === 'succeeded').length : 0
     const dates = [
-      ...outputs.map((o) => o.created_at), ...inputs.map((i) => i.created_at), ...bekkais.map((b) => b.created_at),
-    ]
+      ...rOut.map((o) => o.created_at), ...rIn.map((i) => i.created_at), ...rBek.map((b) => b.created_at).filter(Boolean),
+    ] as string[]
     return {
       discovery, failure, realization, realizationDone,
-      bekkaiTotal: bekkais.length,
-      bekkaiDone: bekkais.filter((b) => b.conclusion?.trim()).length,
-      outputs: outputs.length, inputs: inputs.length,
+      bekkaiTotal: rBek.length,
+      bekkaiDone: rBek.filter((b) => b.conclusion?.trim()).length,
+      outputs: rOut.length, inputs: rIn.length,
       streak: currentStreak(dates),
     }
-  }, [outputs, inputs, bekkais, failurePower, realizationPower, entries])
+  }, [g.outputs, g.inputs, g.failurePower, g.realizationPower, bekkais, entries, modes])
 
   const earned = useMemo(() => earnedBadges(ctx), [ctx])
 

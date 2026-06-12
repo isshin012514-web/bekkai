@@ -5,6 +5,7 @@ import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
 import { peerScoredCount } from '@/lib/utils'
+import { useSampleView, getRealData } from '@/stores/sample-view-store'
 import { WeeklySummary } from './WeeklySummary'
 import { WeeklyReviewButton } from './WeeklyReviewButton'
 import { WeeklyReviewModal } from './WeeklyReviewModal'
@@ -96,13 +97,24 @@ const Card = ({ title, sub, children }: { title: string; sub?: string; children:
 )
 
 export function GrowthDashboard() {
-  const { outputs, inputs, failurePower, realizationPower } = useGrowthStore()
-  const bekkais = useBekkaiStore((s) => s.bekkais)
-  const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
+  // サマリーは「実データ（Myデータ）」で集計。サンプル表示中は退避中の実データを使う。
+  const g = useGrowthStore()
+  const bekkaisLive = useBekkaiStore((s) => s.bekkais)
+  const entriesLive = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
+  const modes = useSampleView((s) => s.modes)
+  const real = useMemo(() => getRealData(),
+    [g.outputs, g.inputs, g.failurePower, g.realizationPower, bekkaisLive, entriesLive, modes])
+
+  const outputs = (real.growthCore.outputs ?? []) as { created_at: string; self_score: number; peer_score?: number | null }[]
+  const inputs = (real.growthCore.inputs ?? []) as { created_at: string }[]
+  const failurePower = real.failurePower
+  const realizationPower = real.realizationPower
+  const bekkais = (real.bekkais ?? []) as unknown[]
+  const entries = real.entries
   const [weeklyOpen, setWeeklyOpen] = useState(false)
 
   const selfScoredTotal = useMemo(() => outputs.filter((o) => o.self_score > 0).length, [outputs])
-  const peerCount = useMemo(() => peerScoredCount(outputs), [outputs])
+  const peerCount = useMemo(() => peerScoredCount(outputs as never), [outputs])
 
   const buckets = useMemo(() => {
     const now = new Date()
@@ -119,8 +131,8 @@ export function GrowthDashboard() {
   }, [outputs, inputs])
 
   const forceRows = useMemo(() => {
-    const discoveryCount = Object.values(entries ?? {}).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0)
-    const failCount = failurePower ? Object.values(failurePower).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
+    const discoveryCount = Object.values(entries ?? {}).reduce((s: number, v) => s + (Array.isArray(v) ? v.length : 0), 0)
+    const failCount = failurePower ? Object.values(failurePower).reduce((s: number, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
     const realCount = realizationPower ? realizationPower.combinations.length + realizationPower.quantityQualities.length + realizationPower.team.length : 0
     return [
       { key: 'growth', label: '成長力', Icon: TrendingUp, color: '#185FA5', count: outputs.length + inputs.length },

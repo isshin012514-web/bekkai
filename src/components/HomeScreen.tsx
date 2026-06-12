@@ -6,6 +6,7 @@ import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
 import { weeklyOutputs } from '@/lib/utils'
 import { currentStreak } from '@/lib/daily'
+import { useSampleView, getRealData } from '@/stores/sample-view-store'
 import { DailyPrompt } from '@/components/DailyPrompt'
 import { CountUp } from '@/components/CountUp'
 import { Badges } from '@/components/Badges'
@@ -15,36 +16,46 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
+  // ストア変更で再描画させるための購読（値はサマリーには直接使わない）
   const { outputs, inputs, failurePower, realizationPower } = useGrowthStore()
   const bekkais = useBekkaiStore((s) => s.bekkais)
   const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
+  const modes = useSampleView((s) => s.modes)
 
-  const weekOut = useMemo(() => weeklyOutputs(outputs).length, [outputs])
+  // サマリーは「実データ（Myデータ）」で集計。サンプル表示中の機能は退避中の実データを使う。
+  const real = useMemo(() => getRealData(),
+    [outputs, inputs, failurePower, realizationPower, bekkais, entries, modes])
+
+  const rOutputs = (real.growthCore.outputs ?? []) as { created_at: string }[]
+  const rInputs = (real.growthCore.inputs ?? []) as { created_at: string }[]
+  const rBekkais = (real.bekkais ?? []) as { created_at?: string }[]
+
+  const weekOut = useMemo(() => weeklyOutputs(rOutputs as never).length, [rOutputs])
 
   const streak = useMemo(() => {
     const dates: string[] = []
-    outputs.forEach((o) => dates.push(o.created_at))
-    inputs.forEach((i) => dates.push(i.created_at))
-    bekkais.forEach((b) => dates.push(b.created_at))
-    if (failurePower) Object.values(failurePower).forEach((v) => Array.isArray(v) && v.forEach((x: { created_at?: string }) => x?.created_at && dates.push(x.created_at)))
-    if (realizationPower) [...realizationPower.combinations, ...realizationPower.quantityQualities, ...realizationPower.team].forEach((x) => x?.created_at && dates.push(x.created_at))
-    Object.values(entries ?? {}).forEach((v) => Array.isArray(v) && v.forEach((x: unknown) => { const c = (x as { created_at?: string })?.created_at; if (c) dates.push(c) }))
+    rOutputs.forEach((o) => o.created_at && dates.push(o.created_at))
+    rInputs.forEach((i) => i.created_at && dates.push(i.created_at))
+    rBekkais.forEach((b) => b.created_at && dates.push(b.created_at))
+    if (real.failurePower) Object.values(real.failurePower).forEach((v) => Array.isArray(v) && v.forEach((x: { created_at?: string }) => x?.created_at && dates.push(x.created_at)))
+    if (real.realizationPower) [...(real.realizationPower.combinations ?? []), ...(real.realizationPower.quantityQualities ?? []), ...(real.realizationPower.team ?? [])].forEach((x) => (x as { created_at?: string })?.created_at && dates.push((x as { created_at: string }).created_at))
+    Object.values(real.entries ?? {}).forEach((v) => Array.isArray(v) && v.forEach((x: unknown) => { const c = (x as { created_at?: string })?.created_at; if (c) dates.push(c) }))
     return currentStreak(dates)
-  }, [outputs, inputs, bekkais, failurePower, realizationPower, entries])
+  }, [real, rOutputs, rInputs, rBekkais])
 
   const forces = useMemo(() => {
-    const discoveryCount = Object.values(entries ?? {}).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0)
-    const failCount = failurePower ? Object.values(failurePower).reduce((s, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
-    const realCount = realizationPower ? realizationPower.combinations.length + realizationPower.quantityQualities.length + realizationPower.team.length : 0
+    const discoveryCount = Object.values(real.entries ?? {}).reduce((s: number, v) => s + (Array.isArray(v) ? v.length : 0), 0)
+    const failCount = real.failurePower ? Object.values(real.failurePower).reduce((s: number, v) => s + (Array.isArray(v) ? v.length : 0), 0) : 0
+    const realCount = real.realizationPower ? (real.realizationPower.combinations?.length ?? 0) + (real.realizationPower.quantityQualities?.length ?? 0) + (real.realizationPower.team?.length ?? 0) : 0
     // 流れ順（発見→別解→実現→失敗→成長）
     return [
       { key: 'discovery' as AppTab, label: '発見力', sub: '解くべき問題を見つける', Icon: Search, color: '#7c6cff', count: discoveryCount, badge: 'STEP ①' },
-      { key: 'bekkai' as AppTab, label: '別解力', sub: '自分の答えを出す', Icon: Sparkles, color: '#DC2626', count: bekkais.length, badge: 'STEP ②' },
+      { key: 'bekkai' as AppTab, label: '別解力', sub: '自分の答えを出す', Icon: Sparkles, color: '#DC2626', count: rBekkais.length, badge: 'STEP ②' },
       { key: 'realization' as AppTab, label: '実現力', sub: '別解を形にする', Icon: Rocket, color: '#EA580C', count: realCount, badge: 'STEP ③' },
       { key: 'failure' as AppTab, label: '失敗力', sub: '転びを糧にする', Icon: AlertTriangle, color: '#0D9488', count: failCount, badge: 'ループ' },
-      { key: 'growth' as AppTab, label: '成長力', sub: 'アウトプットで伸ばす', Icon: TrendingUp, color: '#185FA5', count: outputs.length + inputs.length, badge: '土台' },
+      { key: 'growth' as AppTab, label: '成長力', sub: 'アウトプットで伸ばす', Icon: TrendingUp, color: '#185FA5', count: rOutputs.length + rInputs.length, badge: '土台' },
     ]
-  }, [outputs, inputs, entries, failurePower, realizationPower, bekkais])
+  }, [real, rOutputs, rInputs, rBekkais])
 
   const total = forces.reduce((s, f) => s + f.count, 0)
 
