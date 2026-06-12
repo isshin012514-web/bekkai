@@ -81,6 +81,12 @@ function App() {
   const [selectedRoleModel, setSelectedRoleModel] = useState<RoleModel | null>(null)
   const [selectedPerson, setSelectedPerson] = useState<UpcomingPerson | null>(null)
   const [addInputOpen, setAddInputOpen] = useState(false)
+  const [deepenOpen, setDeepenOpen] = useState(false)
+  const [deepenInitial, setDeepenInitial] = useState<{ type?: 'dialogue'; title?: string; learning?: string } | undefined>(undefined)
+  const openDeepenInput = (question: string) => {
+    setDeepenInitial({ type: 'dialogue', title: '', learning: `今日の問い: ${question}` })
+    setDeepenOpen(true)
+  }
   const [addPersonOpen, setAddPersonOpen] = useState(false)
   const [selfScoreOpen, setSelfScoreOpen] = useState(false)
 
@@ -105,7 +111,8 @@ function App() {
       <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
 
       <main style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 108px)' }}>
-      {activeTab === 'home' && <HomeScreen onNavigate={handleTabChange} />}
+      {activeTab === 'home' && <HomeScreen onNavigate={handleTabChange} onDeepenInput={openDeepenInput} />}
+      <AddInputModal open={deepenOpen} onClose={() => setDeepenOpen(false)} initial={deepenInitial} />
 
       {activeTab === 'about' && <AboutScreen onStart={() => handleTabChange('home')} onBack={() => handleTabChange('home')} />}
 

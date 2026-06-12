@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { inputSchema, type InputFormValues } from '@/lib/schemas'
@@ -11,11 +11,13 @@ import { useGrowthStore } from '@/stores/growth-store'
 interface AddInputModalProps {
   open: boolean
   onClose: () => void
+  /** 開いたときにプリフィルする初期値（今日の問いの深掘りなど） */
+  initial?: Partial<InputFormValues>
 }
 
 const INPUT_TYPES: InputType[] = ['book', 'article', 'video', 'dialogue', 'other']
 
-export function AddInputModal({ open, onClose }: AddInputModalProps) {
+export function AddInputModal({ open, onClose, initial }: AddInputModalProps) {
   const addInput = useGrowthStore((s) => s.addInput)
   const [attachments, setAttachments] = useState<Attachment[]>([])
 
@@ -36,6 +38,12 @@ export function AddInputModal({ open, onClose }: AddInputModalProps) {
   })
 
   const selectedType = watch('type')
+
+  // 開いたときに初期値をプリフィル（深掘り用）
+  useEffect(() => {
+    if (open) reset({ type: 'book', title: '', learning: '', ...(initial ?? {}) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const onSubmit = (data: InputFormValues) => {
     addInput({ ...data, attachments })

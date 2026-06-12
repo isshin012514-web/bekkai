@@ -13,9 +13,10 @@ import { Badges } from '@/components/Badges'
 
 interface HomeScreenProps {
   onNavigate: (tab: AppTab) => void
+  onDeepenInput?: (question: string) => void
 }
 
-export function HomeScreen({ onNavigate }: HomeScreenProps) {
+export function HomeScreen({ onNavigate, onDeepenInput }: HomeScreenProps) {
   // ストア変更で再描画させるための購読（値はサマリーには直接使わない）
   const { outputs, inputs, failurePower, realizationPower } = useGrowthStore()
   const bekkais = useBekkaiStore((s) => s.bekkais)
@@ -96,7 +97,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
       </div>
 
       {/* 今日の問い */}
-      <DailyPrompt />
+      <DailyPrompt onDeepen={onDeepenInput} />
 
       {/* 獲得した称号 */}
       <Badges />
@@ -130,7 +131,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               <span className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${f.color}1A` }}>
                 <f.Icon size={24} style={{ color: f.color }} />
               </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${f.color}14`, color: f.color }}>{f.badge}</span>
+              <span className="text-[12px] font-bold px-3 py-1 rounded-full" style={{ background: `${f.color}1F`, color: f.color }}>{f.badge}</span>
             </div>
             <div className="flex items-baseline gap-2 mt-3">
               <p className="text-[17px] font-bold" style={{ color: f.color }}>{f.label}</p>
