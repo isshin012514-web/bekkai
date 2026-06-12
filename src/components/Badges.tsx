@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { Award, ChevronUp, ChevronDown } from 'lucide-react'
 import { useGrowthStore } from '@/stores/growth-store'
 import { useBekkaiStore } from '@/stores/bekkai-store'
 import { useEntriesStore } from '@/discovery/stores/entries-store'
@@ -16,6 +17,7 @@ export function Badges() {
   const bekkais = useBekkaiStore((s) => s.bekkais)
   const entries = useEntriesStore((s: { entries: Record<string, unknown[]> }) => s.entries)
   const modes = useSampleView((s) => s.modes)
+  const [expanded, setExpanded] = useState(false)
 
   const ctx = useMemo(() => {
     const real = getRealData()
@@ -58,22 +60,26 @@ export function Badges() {
 
   return (
     <div className="mx-4 mt-3">
-      <div className="flex items-center gap-1.5 mb-1.5">
+      <button onClick={() => setExpanded((e) => !e)} className="w-full flex items-center gap-1.5 py-1">
+        <Award size={13} className="text-waiting" />
         <span className="text-[12px] font-medium text-text-secondary">獲得した称号</span>
         <span className="text-[10px] text-text-tertiary">{earned.length}/{BADGES.length}</span>
-      </div>
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {earned.map((b) => (
-          <div key={b.key} title={b.desc}
-            className="shrink-0 flex flex-col items-center justify-center gap-1 w-16 h-[68px] rounded-xl border bg-surface"
-            style={{ borderColor: `${b.color}33` }}>
-            <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${b.color}1A` }}>
-              <b.Icon size={17} style={{ color: b.color }} strokeWidth={2.2} />
-            </span>
-            <span className="text-[8px] text-text-secondary text-center leading-tight px-1">{b.label}</span>
-          </div>
-        ))}
-      </div>
+        {expanded ? <ChevronUp size={14} className="ml-auto text-text-tertiary" /> : <ChevronDown size={14} className="ml-auto text-text-tertiary" />}
+      </button>
+      {expanded && (
+        <div className="flex gap-2 overflow-x-auto pb-1 mt-1">
+          {earned.map((b) => (
+            <div key={b.key} title={b.desc}
+              className="shrink-0 flex flex-col items-center justify-center gap-1 w-16 h-[68px] rounded-xl border bg-surface"
+              style={{ borderColor: `${b.color}33` }}>
+              <span className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${b.color}1A` }}>
+                <b.Icon size={17} style={{ color: b.color }} strokeWidth={2.2} />
+              </span>
+              <span className="text-[8px] text-text-secondary text-center leading-tight px-1">{b.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

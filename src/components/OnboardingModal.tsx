@@ -6,12 +6,21 @@ import type { LucideIcon } from 'lucide-react'
 
 const ONBOARD_KEY = 'bekkai-onboarded'
 const SKIP_KEY = 'bekkai-onboarding-skip'
+const LAUNCH_KEY = 'onboarding-launch-count'
+const VER_KEY = 'onboarding-version-seen'
+// 内容を大きく変えたら上げる → 既存ユーザーにも1回だけ再表示される
+const ONBOARDING_VERSION = '2'
+// 自動表示する初回からの回数
+const AUTO_SHOW_LAUNCHES = 3
 
 export function isOnboarded(): boolean {
   try { return localStorage.getItem(ONBOARD_KEY) === '1' } catch { return true }
 }
 export function markOnboarded() {
-  try { localStorage.setItem(ONBOARD_KEY, '1') } catch { /* noop */ }
+  try {
+    localStorage.setItem(ONBOARD_KEY, '1')
+    localStorage.setItem(VER_KEY, ONBOARDING_VERSION)
+  } catch { /* noop */ }
 }
 /** 起動時に使い方を自動表示しない設定か（既定: 表示する） */
 export function isOnboardingSkipped(): boolean {
@@ -19,6 +28,23 @@ export function isOnboardingSkipped(): boolean {
 }
 function setOnboardingSkip(skip: boolean) {
   try { skip ? localStorage.setItem(SKIP_KEY, '1') : localStorage.removeItem(SKIP_KEY) } catch { /* noop */ }
+}
+
+/** 起動時に自動表示すべきか：最初の数回 or バージョン更新時のみ（手動オフは尊重） */
+export function shouldAutoShowOnboarding(): boolean {
+  if (isOnboardingSkipped()) return false
+  try {
+    const count = Number(localStorage.getItem(LAUNCH_KEY) || 0)
+    const verSeen = localStorage.getItem(VER_KEY)
+    return count < AUTO_SHOW_LAUNCHES || verSeen !== ONBOARDING_VERSION
+  } catch { return true }
+}
+/** 起動回数を1つ進める（アプリ起動時に一度だけ呼ぶ） */
+export function registerLaunch() {
+  try {
+    const count = Number(localStorage.getItem(LAUNCH_KEY) || 0)
+    localStorage.setItem(LAUNCH_KEY, String(Math.min(count + 1, 99)))
+  } catch { /* noop */ }
 }
 
 interface Power {

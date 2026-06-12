@@ -97,10 +97,7 @@ export function HomeScreen({ onNavigate, onDeepenInput }: HomeScreenProps) {
       </div>
 
       {/* 今日の問い */}
-      <DailyPrompt onDeepen={onDeepenInput} />
-
-      {/* 獲得した称号 */}
-      <Badges />
+      <DailyPrompt onDeepen={onDeepenInput} onNavigate={onNavigate} />
 
       {/* 次にやること */}
       <button
@@ -169,20 +166,8 @@ export function HomeScreen({ onNavigate, onDeepenInput }: HomeScreenProps) {
         <ChevronRight size={15} className="text-text-tertiary" />
       </button>
 
-      {/* フロー（5つの力のつながり） */}
-      <div className="mx-4 mt-3 bg-surface-secondary rounded-xl px-3 py-3">
-        <p className="text-[10px] text-text-tertiary mb-2">流れ</p>
-        <div className="flex items-center justify-center gap-1 flex-wrap text-[11px]">
-          {[['発見', '#7c6cff'], ['別解', '#DC2626'], ['実現', '#EA580C']].map(([t, c], i) => (
-            <span key={t} className="flex items-center gap-1">
-              {i > 0 && <span className="text-text-tertiary">→</span>}
-              <span className="px-2 py-0.5 rounded-full font-medium" style={{ background: `${c}1A`, color: c }}>{t}</span>
-            </span>
-          ))}
-          <span className="text-text-tertiary">＋</span>
-          <span className="px-2 py-0.5 rounded-full font-medium" style={{ background: '#0D94881A', color: '#0D9488' }}>失敗で立て直す</span>
-        </div>
-      </div>
+      {/* 獲得した称号（折りたたみ・2軍） */}
+      <Badges />
 
       <button onClick={() => onNavigate('about')} className="mx-auto mt-4 block text-[11px] text-text-tertiary underline underline-offset-2">
         bekkai とは？

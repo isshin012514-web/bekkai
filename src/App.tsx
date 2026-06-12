@@ -24,7 +24,7 @@ import { HomeScreen } from '@/components/HomeScreen'
 import { AboutScreen } from '@/components/AboutScreen'
 import { FeatureGuide, isGuideHidden } from '@/components/FeatureGuide'
 import type { GuideFeature } from '@/components/FeatureGuide'
-import { OnboardingModal, isOnboarded, isOnboardingSkipped } from '@/components/OnboardingModal'
+import { OnboardingModal, isOnboarded, shouldAutoShowOnboarding, registerLaunch } from '@/components/OnboardingModal'
 import { Toaster } from '@/components/Toaster'
 import { QuickCapture } from '@/components/QuickCapture'
 import { Celebration } from '@/components/Celebration'
@@ -60,8 +60,8 @@ function App() {
     !isOnboarded() && !NON_GUIDE.includes(tab) && isFeatureEmpty(tab) && !isGuideHidden(tab as GuideFeature) && !shownThisSession.current.has(tab)
 
   const [activeTab, setActiveTab] = useState<AppTab>('home')
-  // 起動するたびに使い方を最初に表示（「次回から表示しない」を選ぶと抑止）
-  const [onboardingOpen, setOnboardingOpen] = useState(() => !isOnboardingSkipped())
+  // 使い方の自動表示：最初の数回 or バージョン更新時のみ（手動オフは尊重）
+  const [onboardingOpen, setOnboardingOpen] = useState(() => { const show = shouldAutoShowOnboarding(); registerLaunch(); return show })
   const [guideOpen, setGuideOpen] = useState(false)
 
   const handleTabChange = (tab: AppTab) => {
