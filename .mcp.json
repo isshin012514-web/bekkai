@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "bekkai-local": {
+      "command": "node",
+      "args": ["./mcp/bekkai-mcp.mjs"],
+      "env": {}
+    }
+  }
+}

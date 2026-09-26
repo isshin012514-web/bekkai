@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "cap:sync": "npm run build && npx cap sync",
     "cap:ios": "npm run build && npx cap sync ios && npx cap open ios",
+    "mcp": "node mcp/bekkai-mcp.mjs",
     "cap:android": "npm run build && npx cap sync android && npx cap open android"
   },
   "dependencies": {

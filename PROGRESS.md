@@ -113,6 +113,19 @@ npm run cap:android # Android用
 
 ---
 
+---
+
+## AI連携（MCP・ローカル完結）
+
+`mcp/bekkai-mcp.mjs` — bekkaiのデータをMCP経由でAIに読ませるローカルサーバー（外部依存なし / 読み取り専用）。
+
+- データ画面で書き出したバックアップJSONを読む方式（localStorageは外部から直接読めないため）
+- ファイルの更新日時を見て自動リロード → 再エクスポートするだけで最新化
+- 公開ツール: `bekkai_status` / `bekkai_summary` / `bekkai_outputs` / `bekkai_inputs` / `bekkai_bekkais` / `bekkai_discovery` / `bekkai_weekly` / `bekkai_raw`
+- 設定手順は `mcp/README.md`。Claude Code用の `.mcp.json` はリポジトリ直下に同梱
+- 個人データ（`mcp/data/*.json`）は`.gitignore`済み
+- 次の一歩: AIの提案をアプリ側へ書き戻す（現状は手入力）、クラウド同期ユーザー向けの直接読み取り
+
 ## 将来的な検討事項
 
 - **マルチデバイス同期**: Supabase等のバックエンド導入が必要
